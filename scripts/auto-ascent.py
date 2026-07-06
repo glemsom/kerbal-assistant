@@ -84,7 +84,8 @@ def connect() -> krpc.Client:
 def stage_fuel_empty(vessel: Any) -> bool:
     """Return True if current stage has no more fuel in any resource."""
     # Check all parts in the current stage
-    stage_parts = vessel.parts.in_current_stage
+    stage_num = vessel.control.current_stage
+    stage_parts = vessel.parts.in_stage(stage_num)
     for part in stage_parts:
         for resource in part.resources.all:
             if resource.amount > 0.001 and resource.density > 0:
@@ -134,7 +135,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
 
     # -- Pre-launch checks ---------------------------------------------------
     situation = str(vessel.situation).split(".")[-1]
-    if situation not in ("PreLaunch", "Landed", "Flying"):
+    if situation not in ("pre_launch", "landed", "flying"):
         log_event("error", message=f"Unexpected vessel situation: {situation}")
         sys.exit(1)
 

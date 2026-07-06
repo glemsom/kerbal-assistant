@@ -144,6 +144,76 @@ python scripts/auto-ascent.py --target-apo 100000 --turn-start 500 --final-pitch
 
 **Body-specific profiles** — see `skills/ascent-profiles.md`.
 
+### `launch-vessel.py` — Launch craft from VAB/SPH ★
+
+Load and launch a craft file from the Vehicle Assembly Building or Space Plane Hangar to the launchpad/runway. Uses kRPC's `launch_vessel` API.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `name` | — | Vessel name (craft file without `.craft` extension). Auto-detects VAB/SPH. |
+| `--vab <name>` | — | Launch from VAB (explicit) |
+| `--sph <name>` | — | Launch from SPH (explicit) |
+| `--site / -s` | auto | Launch site: `LaunchPad` or `Runway` |
+| `--recover / -r` | True | Recover existing active vessel before launch |
+| `--no-recover` | — | Don't recover existing vessel |
+| `--list / -l` | — | List launchable vessels |
+
+```bash
+# Launch Orbit 1 from VAB to LaunchPad (auto-detect facility)
+python scripts/launch-vessel.py "Orbit 1"
+
+# List available craft
+python scripts/launch-vessel.py --list
+
+# Explicit VAB launch to custom site
+python scripts/launch-vessel.py --vab "Mun Lander" --site LaunchPad
+
+# Launch from SPH to Runway
+python scripts/launch-vessel.py --sph "Spaceplane"
+```
+
+---
+
+### `ksp-status.py` — KSP/kRPC connection status ★
+
+Check whether KSP is running, kRPC is responding, and get game/vessel state summary.
+
+| Flag | Description |
+|------|-------------|
+| `--vessels` | Include vessels in physics range |
+| `--launchable` | Include launchable craft in VAB/SPH |
+| `--all / -a` | Include all optional info |
+| `--minify` | Compact JSON (single line) |
+
+```bash
+# Basic status check
+python scripts/ksp-status.py
+
+# Full status with vessels and launchable craft
+python scripts/ksp-status.py --all
+
+# For scripting
+python scripts/ksp-status.py --minify
+```
+
+**Output example:**
+
+```json
+{
+  "connected": true,
+  "game_mode": "career",
+  "active_vessel": {
+    "name": "Orbit 1",
+    "situation": "pre_launch",
+    "body": "Kerbin",
+    "staging": { "current_stage": 3 }
+  }
+}
+```
+
+---
+
+
 ---
 
 ### `create-node.py` — Maneuver node planner ★
@@ -542,8 +612,10 @@ Scripts that connect via kRPC fail if KSP isn't running or the kRPC server isn't
 
 | Task | Command |
 |------|---------|
-| Check vessel state | `python scripts/live-telemetry.py` |
-| Launch to orbit | `python scripts/auto-ascent.py --target-apo 100000` |
+|| Check vessel state | `python scripts/live-telemetry.py` |
+|| Launch to orbit | `python scripts/auto-ascent.py --target-apo 100000` |
+|| Load craft onto launchpad | `python scripts/launch-vessel.py "Orbit 1"` |
+|| Check KSP connection | `python scripts/ksp-status.py` |
 | Calculate rocket dV | `python scripts/dv-calc.py --isp 350 --wet 40000 --dry 5000` |
 | Look up dV to Duna | `python scripts/dv-map.py --body Duna` |
 | Find transfer window | `python scripts/transfer-window.py --target Duna` |

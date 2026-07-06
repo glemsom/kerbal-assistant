@@ -745,7 +745,7 @@ def landing_sequence(args: argparse.Namespace) -> None:
 
     # Check situation
     sit = str(vessel.situation).split(".")[-1]
-    if sit not in ("Orbiting", "SubOrbital", "Flying"):
+    if sit not in ("orbiting", "sub_orbital", "flying"):
         log_event("error", message=f"Unexpected situation: {sit}")
         sys.exit(1)
 

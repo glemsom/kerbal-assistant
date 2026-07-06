@@ -66,7 +66,7 @@ def get_telemetry(conn, target_name=None):
             "situation": str(vessel.situation).split(".")[-1],
             "biome": vessel.biome,
             "crew_count": len(vessel.crew),
-            "crew": [{"name": m.name, "role": str(m.role).split(".")[-1], "trait": m.trait} for m in vessel.crew],
+            "crew": [{"name": m.name, "trait": m.trait} for m in vessel.crew],
         },
         "mass": {
             "total": round(vessel.mass, 3),

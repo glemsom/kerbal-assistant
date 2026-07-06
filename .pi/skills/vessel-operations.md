@@ -24,14 +24,14 @@ From telemetry orbit data:
 
 | Situation | Meaning | What you can do |
 |---|---|---|
-| `Landed` | On surface, not moving | Launch, EVA, deploy experiments |
-| `Splashed` | In water | Same as landed |
-| `Flying` | In atmosphere, not in space | Fly, ascend, or aerobrake |
-| `SubOrbital` | Above 70 km but periapsis < 70 km | Circularize or re-enter |
-| `Orbiting` | Stable orbit (periapsis ≥ 70 km) | Maneuver, transfer, rendezvous |
-| `Escaping` | On escape trajectory (eccentricity ≥ 1) | Burn to capture or escape |
-| `Docked` | Docked to another vessel | Undock, transfer crew |
-| `PreLaunch` | On launchpad/runway | Launch! |
+| `pre_launch` | On launchpad/runway | Launch! |
+| `landed` | On surface, not moving | Launch, EVA, deploy experiments |
+| `splashed` | In water | Same as landed |
+| `flying` | In atmosphere, not in space | Fly, ascend, or aerobrake |
+| `sub_orbital` | Above 70 km but periapsis < 70 km | Circularize or re-enter |
+| `orbiting` | Stable orbit (periapsis ≥ 70 km) | Maneuver, transfer, rendezvous |
+| `escaping` | On escape trajectory (eccentricity ≥ 1) | Burn to capture or escape |
+| `docked` | Docked to another vessel | Undock, transfer crew |
 
 ## Burn Timing
 
