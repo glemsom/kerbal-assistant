@@ -43,7 +43,7 @@ All absolute paths. A new agent must read this section first.
 | Career strategy skill | `.pi/skills/career-strategy.md` |
 | Delta-V planning skill | `.pi/skills/delta-v-planning.md` |
 | Install tools | `setup/` |
-
+| Python venv (kRPC client) | `.venv/` (use `.venv/bin/python` to run scripts) |
 ## Language
 
 **Skill**:
@@ -65,7 +65,7 @@ KSP's career mode — managing funds, reputation, science, contracts, and missio
 A spacecraft built and flown in KSP.
 
 **kRPC**:
-A mod and RPC library that exposes KSP's internal state over a network protocol. The Python client (`pip install krpc`) connects to the kRPC server running inside KSP. Provides services: SpaceCenter, Vessel, Control, AutoPilot, Orbit, Flight, CelestialBody. Default ports: RPC=50000, Stream=50001.
+A mod and RPC library that exposes KSP's internal state over a network protocol. The Python client (installed in `.venv/`; run via `.venv/bin/python`) connects to the kRPC server running inside KSP. Provides services: SpaceCenter, Vessel, Control, AutoPilot, Orbit, Flight, CelestialBody. Default ports: RPC=50000, Stream=50001.
 _Avoid_: "the mod", "kRPC server" (ambiguous)
 
 **Live Telemetry**:

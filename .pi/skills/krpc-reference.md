@@ -3,6 +3,8 @@ name: krpc-reference
 description: Condensed kRPC API reference — connection setup, core services (SpaceCenter, Vessel, Control, AutoPilot), common patterns for KSP scripting. Use when writing or understanding kRPC Python scripts.
 ---
 
+> **Venv**: This repo installs kRPC in `.venv/`. Run scripts with `.venv/bin/python` or activate `source .venv/bin/activate` first.
+
 # kRPC API Reference for Pi
 
 Condensed reference for writing kRPC scripts. Full docs at [krpc.github.io/krpc](https://krpc.github.io/krpc/).
