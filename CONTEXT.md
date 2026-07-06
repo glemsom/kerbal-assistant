@@ -35,6 +35,8 @@ All absolute paths. A new agent must read this section first.
 | Vessel operations skill | `skills/vessel-operations.md` |
 | Automation scripts | `scripts/` |
 | Live telemetry script | `scripts/live-telemetry.py` |
+| Save parser (career pulse) | `scripts/save-parser.py` |
+| Career strategy skill | `skills/career-strategy.md` |
 | Install tools | `setup/` |
 
 ## Language
@@ -75,6 +77,9 @@ A planned orbit change in KSP defined by prograde, normal, and radial delta-V co
 **Vessel Operations**:
 Interpreting live telemetry data — orbital parameters, vessel situation, biome, staging guidance, and burn timing. Skill: `skills/vessel-operations.md`.
 
+**Save File (.sfs)**:
+KSP's persistent game state format. A custom nested key-value structure with `{ }` blocks. Career data is stored in SCENARIO blocks (Funding, Reputation, ResearchAndDevelopment, ContractSystem). Parse with `scripts/save-parser.py`.
+
 ## Skill domains
 
 **Mission Guidance**:
@@ -87,7 +92,7 @@ Principles and checklists for building stable, efficient rockets — staging, de
 Calculating and budgeting delta-V for transfers, landings, and returns using the Kerbol system's delta-V map.
 
 **Contract Strategy**:
-Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency.
+Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency. Reference: `skills/career-strategy.md`.
 
 **Vessel Operations**:
 Interpreting vessel telemetry — orbital parameters, situation awareness, biome science, when to stage/burn, and error conditions. Reference: `skills/vessel-operations.md`.
