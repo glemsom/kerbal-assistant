@@ -25,6 +25,7 @@ Default ports: RPC=50000, Stream=50001. Configure in KSP → kRPC toolbar.
 | Method / Property | Returns | Description |
 |---|---|---|
 | `.active_vessel` | `Vessel` | Currently controlled vessel |
+| | | _⚠️ Throws ValueError when no vessel active (KSC scene). Not None. Use try/except or `krpc_utils.get_active_vessel()`._ |
 | `.vessels` | `list[Vessel]` | All vessels in physics range |
 | `.bodies` | `dict[str, CelestialBody]` | All celestial bodies (keyed by name) |
 | `.target_body` | `CelestialBody` | Currently targeted body |

@@ -13,11 +13,7 @@ import json
 import sys
 import argparse
 
-try:
-    import krpc
-except ImportError:
-    print(json.dumps({"error": "krpc not installed. Run: pip install krpc"}))
-    sys.exit(1)
+from krpc_utils import connect, get_active_vessel
 
 
 def get_resource_groups(vessel):
@@ -50,7 +46,7 @@ def get_telemetry(conn, target_name=None):
             return {"error": f"Vessel '{target_name}' not found"}
         vessel = vessels[0]
     else:
-        vessel = sc.active_vessel
+        vessel = get_active_vessel(conn)
         if vessel is None:
             return {"error": "No active vessel"}
 
@@ -138,15 +134,8 @@ def main():
     args = parser.parse_args()
 
     try:
-        conn = krpc.connect(name="kerbal-assistant-telemetry", address="127.0.0.1", rpc_port=50000)
-    except ConnectionRefusedError:
-        print(json.dumps({"error": "KSP not running or kRPC not responding (ConnectionRefusedError)"}))
-        sys.exit(1)
-    except TimeoutError:
-        print(json.dumps({"error": "kRPC connection timed out — is KSP running?"}))
-        sys.exit(1)
-    except Exception as e:
-        print(json.dumps({"error": f"kRPC connection failed: {e}"}))
+        conn = connect(name="kerbal-assistant-telemetry")
+    except SystemExit:
         sys.exit(1)
 
     data = get_telemetry(conn, target_name=args.vessel)

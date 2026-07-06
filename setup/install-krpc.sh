@@ -60,7 +60,7 @@ else
     echo "=== kRPC install complete ==="
     echo "Python client installed in project venv (.venv/)."
     echo "Activate: source .venv/bin/activate"
-    echo "Then verify: python3 -c \"import krpc; conn = krpc.connect(name='test'); print(conn.space_center.active_vessel.name)\""
+    echo "Then verify: source .venv/bin/activate && python3 -c \"import krpc; conn = krpc.connect(name='test', address='127.0.0.1', rpc_port=50000); print(conn.space_center.active_vessel.name)\"
     exit 0
 fi
 
@@ -73,4 +73,4 @@ python3 -c "import krpc; print('krpc Python client OK, version:', krpc.__version
 echo ""
 echo "=== kRPC install complete ==="
 echo "Launch KSP and check the kRPC toolbar icon to enable the server."
-echo "Then run: python3 -c \"import krpc; conn = krpc.connect(name='test'); print(conn.space_center.active_vessel.name)\""
+echo "Then run: source .venv/bin/activate && python3 -c \"import krpc; conn = krpc.connect(name='test', address='127.0.0.1', rpc_port=50000); print(conn.space_center.active_vessel.name)\"

@@ -18,6 +18,7 @@ Default ports: RPC=50000, Stream=50001. Configure in KSP → kRPC toolbar.
 | Method / Property | Returns | Description |
 |---|---|---|
 | `.active_vessel` | `Vessel` | Currently controlled vessel |
+| | | _⚠️ Throws ValueError when no vessel active (KSC scene). Not None. Use try/except or `krpc_utils.get_active_vessel()`._ |
 | `.vessels` | `list[Vessel]` | All loaded vessels |
 | `.vessels_in_physics_range` | `list[Vessel]` | Vessels within physics range |
 | `.target_vessel` | `Vessel or None` | Set/get targeted vessel |

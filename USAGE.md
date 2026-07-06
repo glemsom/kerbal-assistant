@@ -57,10 +57,10 @@ Downloads kRPC v0.5.4, installs the mod into GameData, and installs the Python `
 ### Step 3: Verify connection
 
 ```bash
-python3 -c "import krpc; conn = krpc.connect(name='test'); print(conn.space_center.active_vessel.name)"
+.venv/bin/python3 -c "import krpc; conn = krpc.connect(name='test', address='127.0.0.1', rpc_port=50000); print('Connected! Vessel:', conn.space_center.active_vessel.name)"
 ```
 
-Should print your active vessel name. If it fails, KSP may not be running or kRPC server not started.
+If you see `Connected! Vessel: <name>`, it works. If you get a ValueError about null vessel, you're at KSC with no active vessel — connection still works. If connection refused, KSP not running or kRPC off.
 
 ### Alternative: standalone mode
 
