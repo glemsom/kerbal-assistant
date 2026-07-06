@@ -60,6 +60,12 @@ signal.signal(signal.SIGTERM, lambda *_: (cleanup(), sys.exit(1)))
 # ---------------------------------------------------------------------------
 
 def connect() -> krpc.Client:
+    """Connect to kRPC server at 127.0.0.1:50000.
+
+    Exits with JSON error message on failure (ConnectionRefusedError,
+    TimeoutError, or generic Exception). Stores connection in global
+    _conn for cleanup().
+    """
     global _conn
     try:
         _conn = krpc.connect(name="kerbal-assistant-ascent", address="127.0.0.1", rpc_port=50000)
@@ -96,6 +102,17 @@ def log_event(event: str, **kwargs: Any) -> None:
 # ---------------------------------------------------------------------------
 
 def auto_ascent(args: argparse.Namespace) -> None:
+    """Execute full ascent to orbit.
+
+    Phases:
+      1. Liftoff — ignite engines, verify positive climb rate
+      2. Gravity turn — interpolate pitch from vertical to --final-pitch,
+         throttle back on high Q or G-force
+      3. Coast — cut throttle, warp to near apoapsis
+      4. Circularization — vis-viva dV calc, maneuver node, execute burn
+
+    All phases emit JSON events via log_event(). Clean abort on Ctrl+C.
+    """
     conn = connect()
     sc = conn.space_center
     vessel = sc.active_vessel
@@ -218,7 +235,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
             break
 
         # Escape from atmosphere: if no atmosphere and apoapsis high enough, cut
-        if not has_atmo and apoapsis > args.target_apo * 0.5:
+        if not has_atmo and apoapsis > args.target_apo * 0.95:
             log_event("vacuum_coast",
                       apoapsis=round(apoapsis, 1),
                       speed=round(speed, 1))
@@ -231,6 +248,18 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # -- Cut throttle, coast to apoapsis --------------------------------------
     vessel.control.throttle = 0.0
     log_event("coasting", apoapsis=round(vessel.orbit.apoapsis_altitude, 1))
+
+    # Re-check apoapsis: atmospheric drag may have lowered it
+    if has_atmo and vessel.orbit.apoapsis_altitude < args.target_apo * 0.95:
+        log_event("re_engage",
+                  apoapsis=round(vessel.orbit.apoapsis_altitude, 1),
+                  message="Apoapsis decayed — burning to restore")
+        vessel.control.throttle = 1.0
+        while vessel.orbit.apoapsis_altitude < args.target_apo * 0.98:
+            time.sleep(0.05)
+        vessel.control.throttle = 0.0
+        log_event("coast_resume",
+                  apoapsis=round(vessel.orbit.apoapsis_altitude, 1))
 
     # Warp to apoapsis if far away
     time_to_apo = vessel.orbit.time_to_apoapsis
@@ -273,16 +302,20 @@ def auto_ascent(args: argparse.Namespace) -> None:
               v_apo=round(v_apo, 1),
               burn_dv=round(burn_dv, 1))
 
-    # Create node and execute
-    node = vessel.control.add_node(sc.ut + vessel.orbit.time_to_apoapsis, prograde=burn_dv)
+    # Create node and execute — guard against negative time_to_apoapsis
+    t_apo = vessel.orbit.time_to_apoapsis
+    if t_apo < 0:
+        log_event("warn", message="Past apoapsis — burning immediately")
+        node = vessel.control.add_node(sc.ut + 10, prograde=burn_dv)
+    else:
+        node = vessel.control.add_node(sc.ut + t_apo, prograde=burn_dv)
     frame = node.orbital_reference_frame
     ap.target_direction(node.burn_vector(frame), frame)
     ap.wait()
 
-    # Execute burn
+    # Execute burn at fixed 30 % throttle for stability
     while node.remaining_delta_v > 0.5:
-        # Throttle proportional to remaining dV, but cap at 0.5
-        vessel.control.throttle = min(0.5, max(0.1, node.remaining_delta_v / burn_dv * 0.5))
+        vessel.control.throttle = 0.3
         time.sleep(0.05)
 
     vessel.control.throttle = 0.0
