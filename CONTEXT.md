@@ -35,8 +35,12 @@ All absolute paths. A new agent must read this section first.
 | Vessel operations skill | `skills/vessel-operations.md` |
 | Automation scripts | `scripts/` |
 | Live telemetry script | `scripts/live-telemetry.py` |
+| dV calculator script | `scripts/dv-calc.py` |
+| dV map script | `scripts/dv-map.py` |
+| Transfer window script | `scripts/transfer-window.py` |
 | Save parser (career pulse) | `scripts/save-parser.py` |
 | Career strategy skill | `skills/career-strategy.md` |
+| Delta-V planning skill | `skills/delta-v-planning.md` |
 | Install tools | `setup/` |
 
 ## Language
@@ -80,6 +84,18 @@ Interpreting live telemetry data — orbital parameters, vessel situation, biome
 **Save File (.sfs)**:
 KSP's persistent game state format. A custom nested key-value structure with `{ }` blocks. Career data is stored in SCENARIO blocks (Funding, Reputation, ResearchAndDevelopment, ContractSystem). Parse with `scripts/save-parser.py`.
 
+**Delta-V Calculator**:
+A script (`scripts/dv-calc.py`) that computes delta-V per stage using the Tsiolkovsky rocket equation. Input engine Isp, wet/dry mass per stage; output dV, TWR, burn duration, mass ratio per stage plus totals.
+
+**dV Map**:
+A script (`scripts/dv-map.py`) that outputs Kerbol system delta-V requirements as structured JSON: transfer dV from Kerbin, capture dV, landing/ascent dV per body, plus difficulty rankings.
+
+**Transfer Window Calculator**:
+A script (`scripts/transfer-window.py`) that computes the phase angle between Kerbin and a target body using kRPC celestial body data, or falls back to community standard phase angles when kRPC is unavailable.
+
+**Hohmann Transfer**:
+An orbital maneuver that uses two engine burns to move a spacecraft between two circular orbits. Most fuel-efficient transfer for co-planar orbits. Phase angle formula: 180° * (1 - sqrt((r1/r2)^3)).
+
 ## Skill domains
 
 **Mission Guidance**:
@@ -89,7 +105,7 @@ Step-by-step advice for completing specific KSP contracts and objectives — wha
 Principles and checklists for building stable, efficient rockets — staging, delta-V budgets, thrust-to-weight ratios, aerodynamic stability.
 
 **Delta-V Planning**:
-Calculating and budgeting delta-V for transfers, landings, and returns using the Kerbol system's delta-V map.
+Calculating and budgeting delta-V for transfers, landings, and returns using the Kerbol system's delta-V map. Reference: `skills/delta-v-planning.md`.
 
 **Contract Strategy**:
 Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency. Reference: `skills/career-strategy.md`.
