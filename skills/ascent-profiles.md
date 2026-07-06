@@ -8,10 +8,11 @@ Reference for launch profiles on different celestial bodies. Use with `scripts/a
 |---|---|---|
 | `--turn-start` | 250 m | Altitude to begin pitch-over |
 | `--turn-end` | 40 000 m | Altitude where final pitch is reached |
-| `--final-pitch` | -5° | Final pitch relative to horizon (negative = above) |
+| `--final-pitch` | 5° | Final pitch relative to horizon (positive = above) |
 | `--max-q` | 15 000 Pa | Max dynamic pressure before throttle-back |
 | `--target-apo` | 100 000 m | Target apoapsis altitude |
 | `--target-peri` | 80 000 m | Target periapsis altitude |
+| `--heading` | 90° | Launch heading (0=North, 90=East) |
 
 ## Profile Guidelines by Body
 
@@ -21,8 +22,8 @@ Standard gravity turn. Start turn early, end high, keep Q under 15 kPa.
 
 | Turn Start | Turn End | Final Pitch | Notes |
 |---|---|---|---|
-| 250 m | 40 000 m | -5° | Default — good for most rockets (TWR 1.3-1.6) |
-| 100 m | 30 000 m | -10° | Aggressive turn — high TWR rockets (>1.6) |
+| 250 m | 40 000 m | 5° | Default — good for most rockets (TWR 1.3-1.6) |
+| 100 m | 30 000 m | 10° | Aggressive turn — high TWR rockets (>1.6) |
 | 500 m | 50 000 m | 0° | Gentle turn — low TWR (<1.3) or heavy payloads |
 
 **Staging tips:**
@@ -41,8 +42,8 @@ Most difficult ascent in the game — 11 000+ m/s to orbit.
 
 | Turn Start | Turn End | Final Pitch | Notes |
 |---|---|---|---|
-| 20 000 m | 60 000 m | -10° | Eve's thick atmosphere delays turn start |
-| 25 000 m | 70 000 m | -5° | Conservative — avoid aerobraking to death |
+| 20 000 m | 60 000 m | 10° | Eve's thick atmosphere delays turn start |
+| 25 000 m | 70 000 m | 5° | Conservative — avoid aerobraking to death |
 
 **Key facts:**
 - Eve atmosphere depth: ~90 km vs Kerbin's ~70 km
@@ -57,8 +58,8 @@ Thin atmosphere means less drag but also less lift for turn.
 
 | Turn Start | Turn End | Final Pitch | Notes |
 |---|---|---|---|
-| 500 m | 10 000 m | -15° | Turn faster — thin air means little benefit from late turn |
-| 1 000 m | 8 000 m | -20° | Even more aggressive — Duna air is very thin |
+| 500 m | 10 000 m | 15° | Turn faster — thin air means little benefit from late turn |
+| 1 000 m | 8 000 m | 20° | Even more aggressive — Duna air is very thin |
 
 **Key facts:**
 - Atmosphere depth: ~50 km
@@ -72,8 +73,8 @@ Similar to Kerbin but slightly lower gravity. Smaller SOI means lower orbital ve
 
 | Turn Start | Turn End | Final Pitch | Notes |
 |---|---|---|---|
-| 500 m | 35 000 m | -5° | Similar to Kerbin but start turn a bit later |
-| 250 m | 30 000 m | -10° | For higher TWR rockets |
+| 500 m | 35 000 m | 5° | Similar to Kerbin but start turn a bit later |
+| 250 m | 30 000 m | 10° | For higher TWR rockets |
 
 **Key facts:**
 - Atmosphere depth: ~60 km
@@ -87,8 +88,8 @@ No atmosphere — immediate gravity turn. You can pitch over right after clearin
 
 | Profile | Notes |
 |---|---|
-| Direct ascent | Start turn at 500 m, final pitch -20°, reach orbit at ~580 m/s |
-| Efficient | Start turn at 1 000 m, final pitch -30° — minimizes gravity losses |
+| Direct ascent | Start turn at 500 m, final pitch 20°, reach orbit at ~580 m/s |
+| Efficient | Start turn at 1 000 m, final pitch 30° — minimizes gravity losses |
 
 **Key facts:**
 - Orbital velocity: ~580 m/s
@@ -102,8 +103,8 @@ Tiny gravity. Almost any rocket can reach orbit easily.
 
 | Profile | Notes |
 |---|---|
-| Any | Start turn at 500 m, final pitch -30°, orbit at ~170 m/s |
-| Minimum dV | Start turn at 1 000 m, final pitch -45° — gravity losses tiny |
+| Any | Start turn at 500 m, final pitch 30°, orbit at ~170 m/s |
+| Minimum dV | Start turn at 1 000 m, final pitch 45° — gravity losses tiny |
 
 **Key facts:**
 - Orbital velocity: ~170 m/s

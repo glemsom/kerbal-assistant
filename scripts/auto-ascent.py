@@ -4,7 +4,7 @@
 Usage:
     python scripts/auto-ascent.py
     python scripts/auto-ascent.py --target-apo 120000 --target-peri 100000
-    python scripts/auto-ascent.py --turn-start 500 --turn-end 40000 --final-pitch -20
+    python scripts/auto-ascent.py --turn-start 500 --turn-end 40000 --final-pitch 20
 
 Abort: Ctrl+C (disengages autopilot, throttle zero).
 """
@@ -124,7 +124,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # AutoPilot setup
     ap = vessel.auto_pilot
     ap.engage()
-    ap.target_pitch_and_heading(90, 90)  # straight up, heading north
+    ap.target_pitch_and_heading(90, args.heading)  # straight up
 
     # -- Liftoff -------------------------------------------------------------
     vessel.control.throttle = 1.0
@@ -148,7 +148,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # -- Gravity turn ---------------------------------------------------------
     turn_start_alt = args.turn_start
     turn_end_alt = args.turn_end
-    final_pitch = args.final_pitch  # degrees from horizontal (negative = above)
+    final_pitch = args.final_pitch  # degrees from horizontal (positive = above horizon)
 
     # Stream altitude for responsive control
     alt_stream = conn.add_stream(getattr, vessel.flight(body.reference_frame), "mean_altitude")
@@ -159,7 +159,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
     stage_num = 1
 
     # Main ascent loop
-    ap.target_pitch_and_heading(90, 90)  # keep pointing up initially
+    ap.target_pitch_and_heading(90, args.heading)  # keep pointing up initially
     while True:
         altitude = alt_stream()
         speed = vel_stream()
@@ -179,18 +179,20 @@ def auto_ascent(args: argparse.Namespace) -> None:
                 log_event("stage", stage=stage_num, altitude=round(altitude, 1))
                 time.sleep(0.3)
             except Exception:
-                # No more stages — continue
-                pass
+                # No more stages — abort if truly empty
+                if stage_fuel_empty(vessel):
+                    log_event("error", message="All stages depleted — aborting ascent")
+                    sys.exit(1)
 
-        # Dynamic throttle: limit dynamic pressure
+        # Dynamic throttle: limit by dynamic pressure and G-force
+        target_throttle = 1.0
         if has_atmo:
             if dyn_pressure > args.max_q:
-                throttle = max(0.3, 1.0 - (dyn_pressure - args.max_q) / args.max_q * 0.5)
-                vessel.control.throttle = throttle
-            else:
-                vessel.control.throttle = 1.0
-        else:
-            vessel.control.throttle = 1.0
+                target_throttle = max(0.3, 1.0 - (dyn_pressure - args.max_q) / args.max_q * 0.5)
+            if g_force > 5.0:
+                target_throttle = max(0.2, target_throttle * 0.8)
+                log_event("g_limit", g_force=round(g_force, 2), throttle=round(target_throttle, 3))
+        vessel.control.throttle = target_throttle
 
         # Pitch control — interpolate between vertical and final pitch
         if altitude <= turn_start_alt:
@@ -202,7 +204,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
             pitch = 90.0 + (final_pitch - 90.0) * fraction
 
         # Follow prograde during gravity turn
-        ap.target_pitch_and_heading(pitch, 90)
+        ap.target_pitch_and_heading(pitch, args.heading)
 
         # Check if we've reached target apoapsis
         orbit = vessel.orbit
@@ -222,10 +224,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
                       speed=round(speed, 1))
             break
 
-        # Safety: limit G-force
-        if g_force > 5.0 and has_atmo:
-            vessel.control.throttle = max(0.2, vessel.control.throttle * 0.8)
-            log_event("g_limit", g_force=round(g_force, 2), throttle=round(vessel.control.throttle, 3))
+
 
         time.sleep(0.05)
 
@@ -257,12 +256,13 @@ def auto_ascent(args: argparse.Namespace) -> None:
     ap.wait()
 
     # Calculate required dV for circularization
-    # At apoapsis: v_circular = sqrt(mu / r)
+    # Use vis-viva to get actual speed at apoapsis (not current position)
     mu = body.gravitational_parameter
     r = vessel.orbit.apoapsis  # distance from body center at apoapsis
+    a = vessel.orbit.semi_major_axis
     v_circular = (mu / r) ** 0.5
-    current_speed = vessel.flight(vessel.orbital_reference_frame).speed
-    burn_dv = v_circular - current_speed
+    v_apo = (2 * mu / r - mu / a) ** 0.5  # vis-viva: speed at apoapsis
+    burn_dv = v_circular - v_apo
 
     if burn_dv < 0:
         # We're already going fast enough — raise periapsis
@@ -270,7 +270,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
 
     log_event("circ_info",
               v_circular=round(v_circular, 1),
-              current_speed=round(current_speed, 1),
+              v_apo=round(v_apo, 1),
               burn_dv=round(burn_dv, 1))
 
     # Create node and execute
@@ -319,11 +319,13 @@ def main() -> None:
                         help="Altitude to start gravity turn in meters (default: 250)")
     parser.add_argument("--turn-end", type=float, default=40000,
                         help="Altitude to end gravity turn in meters (default: 40000)")
-    parser.add_argument("--final-pitch", type=float, default=-5,
+    parser.add_argument("--final-pitch", type=float, default=5,
                         help="Final pitch angle at turn end in degrees from "
-                             "horizontal (default: -5, negative = above horizon)")
+                             "horizontal (default: 5, positive = above horizon)")
     parser.add_argument("--max-q", type=float, default=15000,
                         help="Max dynamic pressure in Pa before throttling down (default: 15000)")
+    parser.add_argument("--heading", type=float, default=90,
+                        help="Launch heading in degrees (default: 90 = East)")
 
     args = parser.parse_args()
 
