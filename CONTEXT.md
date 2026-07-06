@@ -32,22 +32,22 @@ All absolute paths. A new agent must read this section first.
 | Agent skills config | `AGENTS.md` |
 | Agent docs | `docs/agents/` |
 | Architecture decisions | `docs/adr/` |
-| Custom skills | `skills/` |
-| Vessel operations skill | `skills/vessel-operations.md` |
+| Custom skills | `.pi/skills/` |
+| Vessel operations skill | `.pi/skills/vessel-operations.md` |
 | Automation scripts | `scripts/` |
 | Live telemetry script | `scripts/live-telemetry.py` |
 | dV calculator script | `scripts/dv-calc.py` |
 | dV map script | `scripts/dv-map.py` |
 | Transfer window script | `scripts/transfer-window.py` |
 | Save parser (career pulse) | `scripts/save-parser.py` |
-| Career strategy skill | `skills/career-strategy.md` |
-| Delta-V planning skill | `skills/delta-v-planning.md` |
+| Career strategy skill | `.pi/skills/career-strategy.md` |
+| Delta-V planning skill | `.pi/skills/delta-v-planning.md` |
 | Install tools | `setup/` |
 
 ## Language
 
 **Skill**:
-A Markdown knowledge base (SKILL.md with YAML frontmatter) that an in-game AI assistant loads at startup and injects as context when matched by keyword. Skills are the primary artifact produced by this repo.
+A Markdown knowledge base (SKILL.md with YAML frontmatter) placed in `.pi/skills/` for Pi auto-discovery. Pi loads skill descriptions at startup and reads full content on-demand when task matches. Skills are the primary artifact produced by this repo.
 _Avoid_: "prompt", "guide", "knowledge base"
 
 **OpenCode Go**:
@@ -80,7 +80,7 @@ _Avoid_: "auto-pilot" (hyphen)
 A planned orbit change in KSP defined by prograde, normal, and radial delta-V components at a specific universal time. kRPC can create, read, execute, and remove nodes.
 
 **Vessel Operations**:
-Interpreting live telemetry data — orbital parameters, vessel situation, biome, staging guidance, and burn timing. Skill: `skills/vessel-operations.md`.
+Interpreting live telemetry data — orbital parameters, vessel situation, biome, staging guidance, and burn timing. Skill: `.pi/skills/vessel-operations.md`.
 
 **Save File (.sfs)**:
 KSP's persistent game state format. A custom nested key-value structure with `{ }` blocks. Career data is stored in SCENARIO blocks (Funding, Reputation, ResearchAndDevelopment, ContractSystem). Parse with `scripts/save-parser.py`.
@@ -106,10 +106,10 @@ Step-by-step advice for completing specific KSP contracts and objectives — wha
 Principles and checklists for building stable, efficient rockets — staging, delta-V budgets, thrust-to-weight ratios, aerodynamic stability.
 
 **Delta-V Planning**:
-Calculating and budgeting delta-V for transfers, landings, and returns using the Kerbol system's delta-V map. Reference: `skills/delta-v-planning.md`.
+Calculating and budgeting delta-V for transfers, landings, and returns using the Kerbol system's delta-V map. Reference: `.pi/skills/delta-v-planning.md`.
 
 **Contract Strategy**:
-Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency. Reference: `skills/career-strategy.md`.
+Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency. Reference: `.pi/skills/career-strategy.md`.
 
 **Vessel Operations**:
-Interpreting vessel telemetry — orbital parameters, situation awareness, biome science, when to stage/burn, and error conditions. Reference: `skills/vessel-operations.md`.
+Interpreting vessel telemetry — orbital parameters, situation awareness, biome science, when to stage/burn, and error conditions. Reference: `.pi/skills/vessel-operations.md`.

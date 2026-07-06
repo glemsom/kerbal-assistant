@@ -429,17 +429,17 @@ python scripts/save-parser.py path/to/persistent.sfs --raw
 
 ## Skills reference
 
-Skills in `skills/` are Markdown knowledge bases loaded by Pi as context. They provide background reference, not executable code.
+Skills in `.pi/skills/` are proper Pi skills with YAML frontmatter (`name`, `description`). Pi auto-discovers them when the project is trusted — their descriptions appear in the system prompt, and Pi reads full content on-demand when the task matches. They provide background reference, not executable code.
 
 | Skill | File | What it covers |
 |-------|------|----------------|
-| **kRPC Reference** | `skills/krpc-reference.md` | Condensed kRPC API — connection, services, common patterns |
-| **Vessel Operations** | `skills/vessel-operations.md` | Interpreting telemetry, when to stage/burn, biome science |
-| **Ascent Profiles** | `skills/ascent-profiles.md` | Launch profiles per body, gravity turn parameters, TWR |
-| **Career Strategy** | `skills/career-strategy.md` | Contract stacking, tech priorities, science farming |
-| **Delta-V Planning** | `skills/delta-v-planning.md` | Rocket equation, dV map, transfer windows, TWR guidelines |
+| **kRPC Reference** | `.pi/skills/krpc-reference.md` | Condensed kRPC API — connection, services, common patterns |
+| **Vessel Operations** | `.pi/skills/vessel-operations.md` | Interpreting telemetry, when to stage/burn, biome science |
+| **Ascent Profiles** | `.pi/skills/ascent-profiles.md` | Launch profiles per body, gravity turn parameters, TWR |
+| **Career Strategy** | `.pi/skills/career-strategy.md` | Contract stacking, tech priorities, science farming |
+| **Delta-V Planning** | `.pi/skills/delta-v-planning.md` | Rocket equation, dV map, transfer windows, TWR guidelines |
 
-Skills pair with scripts: e.g., `ascent-profiles.md` tells you the right `auto-ascent.py` parameters for each body.
+Skills pair with scripts: e.g., `.pi/skills/ascent-profiles.md` tells you the right `auto-ascent.py` parameters for each body.
 
 ---
 
