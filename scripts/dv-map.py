@@ -142,27 +142,24 @@ BODIES = {
         "atmosphere": False,
         "difficulty": 8,
     },
-}
-
-# Kerbin's own moons
-BODIES["Mun"] = {
-    "transfer": 860,       # From Kerbin LKO (~80km)
-    "capture": 240,
-    "landing": 580,
-    "ascent": 580,
-    "gravity": 1.63,
-    "atmosphere": False,
-    "difficulty": 2,
-}
-
-BODIES["Minmus"] = {
-    "transfer": 930,       # From Kerbin LKO (~80km) — higher plane change
-    "capture": 80,
-    "landing": 180,
-    "ascent": 180,
-    "gravity": 0.49,
-    "atmosphere": False,
-    "difficulty": 1,
+    "Mun": {
+        "transfer": 860,       # From Kerbin LKO (~80km)
+        "capture": 240,
+        "landing": 580,
+        "ascent": 580,
+        "gravity": 1.63,
+        "atmosphere": False,
+        "difficulty": 2,
+    },
+    "Minmus": {
+        "transfer": 930,       # From Kerbin LKO (~80km) — higher plane change
+        "capture": 80,
+        "landing": 180,
+        "ascent": 180,
+        "gravity": 0.49,
+        "atmosphere": False,
+        "difficulty": 1,
+    },
 }
 
 # Order by difficulty

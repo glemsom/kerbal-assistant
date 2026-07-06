@@ -8,7 +8,6 @@ window using phase angle approximation.
 Usage:
     python scripts/transfer-window.py --target Duna
     python scripts/transfer-window.py --target Duna --source Kerbin
-    python scripts/transfer-window.py --target Eve --year 1 --day 200
     python scripts/transfer-window.py --list-bodies
     python scripts/transfer-window.py --minify
     python scripts/transfer-window.py --standalone   (no kRPC needed)
@@ -69,14 +68,6 @@ STANDARD_TRANSFER_TIME = {
     "Mun": 6 * DAY_S,     # Hours, not days
     "Minmus": 18 * DAY_S,
 }
-
-
-def get_orbital_period(body) -> float:
-    """Get orbital period of a celestial body around its parent (seconds)."""
-    try:
-        return body.orbital_period
-    except Exception:
-        return 0.0
 
 
 def get_semi_major_axis(body) -> float:
@@ -144,13 +135,13 @@ def compute_phase_angle_from_krpc(conn, source_name: str, target_name: str) -> d
     target_pos = target_orbit.position_at(ut, reference_frame=conn.space_center.bodies[source.orbiting_body.name].reference_frame)
 
     # Phase angle from Kerbin's perspective: angle between Kerbin->Sun and Target->Sun vectors
-    import numpy as np
+    v1 = (source_pos[0], source_pos[1], source_pos[2])
+    v2 = (target_pos[0], target_pos[1], target_pos[2])
 
-    v1 = np.array([source_pos[0], source_pos[1], source_pos[2]])
-    v2 = np.array([target_pos[0], target_pos[1], target_pos[2]])
-
-    dot = np.dot(v1, v2)
-    norm = np.linalg.norm(v1) * np.linalg.norm(v2)
+    dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]
+    n1 = math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + v1[2]*v1[2])
+    n2 = math.sqrt(v2[0]*v2[0] + v2[1]*v2[1] + v2[2]*v2[2])
+    norm = n1 * n2
     if norm == 0:
         return {"error": "Cannot compute phase angle: zero position vector"}
 
@@ -159,11 +150,10 @@ def compute_phase_angle_from_krpc(conn, source_name: str, target_name: str) -> d
     phase_rad = math.acos(cos_angle)
     phase_deg = math.degrees(phase_rad)
 
-    # Determine sign (ahead/behind) using cross product
-    cross = np.cross(v1, v2)
-    # If cross product z-component is negative, target is behind
-    # (depends on coordinate system orientation)
-    if cross[2] < 0:
+    # Determine sign (ahead/behind) using cross product z-component
+    # cross_z = v1_x * v2_y - v1_y * v2_x
+    cross_z = v1[0] * v2[1] - v1[1] * v2[0]
+    if cross_z < 0:
         phase_deg = -phase_deg
 
     return {
@@ -221,8 +211,6 @@ def main():
     parser.add_argument("--minify", action="store_true", help="Minify JSON output")
     parser.add_argument("--list-bodies", action="store_true", help="List available bodies")
     parser.add_argument("--standalone", action="store_true", help="Use community values instead of kRPC")
-    parser.add_argument("--year", type=float, help="UT year for KSP calendar (optional)")
-    parser.add_argument("--day", type=float, help="UT day for KSP calendar (optional)")
     args = parser.parse_args()
 
     indent = None if args.minify else 2

@@ -26,7 +26,7 @@ def dv_stage(isp_s: float, wet_mass: float, dry_mass: float) -> float:
     return isp_s * G0 * math.log(wet_mass / dry_mass)
 
 
-def twr_stage(thrust_n: float, wet_mass: float, body_g: float = 9.80665) -> float:
+def twr_stage(thrust_n: float, wet_mass: float, body_g: float = G0) -> float:
     """Thrust-to-weight ratio for a stage."""
     if wet_mass <= 0:
         return 0.0
