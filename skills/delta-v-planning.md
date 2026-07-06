@@ -1,5 +1,5 @@
 ---
-keywords: ["delta-v", "delta v", "dV", "mission planning", "transfer window", "hohmann", "rocket equation", "tsiolkovsky", "mass ratio", "twr", "thrust to weight", "porkchop", "ejection angle"]
+keywords: ["delta-v", "delta v", "dV", "mission planning", "transfer window", "hohmann", "rocket equation", "tsiolkovsky", "mass ratio", "twr", "thrust to weight", "ejection angle"]
 ---
 
 # Delta-V Planning

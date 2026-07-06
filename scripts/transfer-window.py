@@ -23,9 +23,10 @@ import math
 # Lazy import krpc — standalone mode doesn't need it
 krpc = None
 
-# Standard gravitational parameter for Kerbin (m^3/s^2)
+# Standard gravitational parameters (m^3/s^2)
 # KSP uses simplified physics: G * M for each body
 MU_KERBIN = 3.5316000e12
+MU_KERBOL = 1.1723328e18  # Sun (Kerbol)
 # 1 Kerbin day in seconds
 DAY_S = 6 * 60 * 60  # 6 hours
 # 1 Kerbin year in seconds
@@ -98,17 +99,33 @@ def compute_hohmann_phase(sma_source: float, sma_target: float) -> float:
 
 
 def compute_transfer_duration(sma_source: float, sma_target: float) -> float:
-    """Compute Hohmann transfer half-orbit period (seconds)."""
+    """Compute Hohmann transfer half-orbit period (seconds).
+
+    Uses MU_KERBOL (Sun's gravitational parameter) since all callers
+    pass SMAs relative to Kerbol.  Moon transfers are handled via
+    standalone constants and never reach this function.
+    """
     if sma_source <= 0 or sma_target <= 0:
         return 0.0
     sma_transfer = (sma_source + sma_target) / 2.0
     # Kepler's third law: T = 2*pi * sqrt(a^3 / mu)
-    T = 2 * math.pi * math.sqrt(sma_transfer ** 3 / MU_KERBIN)
+    T = 2 * math.pi * math.sqrt(sma_transfer ** 3 / MU_KERBOL)
     return T / 2  # Half orbit for transfer
 
 
 def compute_phase_angle_from_krpc(conn, source_name: str, target_name: str) -> dict:
-    """Compute phase angle between source and target using kRPC celestial body data."""
+    """Compute phase angle between source and target using kRPC celestial body data.
+
+    NOTE: The Hohmann formula assumes circular coplanar orbits and gives the
+    *geometric* phase angle at departure.  Community STANDARD_PHASE values
+    account for KSP orbit eccentricities and are empirically verified to give
+    better practical transfer windows.  When both are available the standalone
+    (community) values are generally preferred for actual mission planning.
+
+    Only works when source and target share the same orbital parent (e.g., both
+    orbiting Kerbol, or both orbiting Kerbin).  For transfers between different
+    hierarchies (e.g., Kerbin -> Mun) the function falls back to standalone.
+    """
     try:
         source = conn.space_center.bodies[source_name]
         target = conn.space_center.bodies[target_name]
@@ -124,6 +141,16 @@ def compute_phase_angle_from_krpc(conn, source_name: str, target_name: str) -> d
 
     if source_sma <= 0 or target_sma <= 0:
         return {"error": "Cannot compute phase angle: missing orbit data"}
+
+    # Bodies must share the same orbital parent for meaningful phase comparison.
+    # Kerbin -> Mun mixes Kerbol-centric and Kerbin-centric SMAs => garbage.
+    try:
+        same_parent = source.orbiting_body.name == target.orbiting_body.name
+    except Exception:
+        same_parent = False
+    if not same_parent:
+        return {"error": f"{source_name} and {target_name} do not share the same orbital parent. "
+                         f"Use --standalone for this transfer."}
 
     # Get current true anomaly / position
     # We'll use the orbit's mean anomaly at epoch and current time
@@ -204,7 +231,7 @@ def list_bodies() -> dict:
     return {"bodies": bodies, "count": len(bodies)}
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Transfer window calculator")
     parser.add_argument("--target", help="Target body (e.g., Duna)")
     parser.add_argument("--source", default="Kerbin", help="Source body (default: Kerbin)")
@@ -237,6 +264,11 @@ def main():
         except (ImportError, ConnectionError, AttributeError):
             data = compute_phase_angle_standalone(args.source, args.target)
             data["connection_error"] = "Could not connect to kRPC. Used community estimates."
+        if "error" in data:
+            # kRPC returned error (e.g., different orbital parents) — fall through
+            err = data["error"]
+            data = compute_phase_angle_standalone(args.source, args.target)
+            data["connection_error"] = f"kRPC path: {err}. Used community estimates."
 
     print(json.dumps(data, indent=indent))
 
