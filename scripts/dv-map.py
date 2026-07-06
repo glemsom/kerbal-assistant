@@ -165,6 +165,30 @@ BODIES = {
 # Order by difficulty
 DIFFICULTY_RANKING = sorted(BODIES.keys(), key=lambda b: BODIES[b]["difficulty"])
 
+# Reference orbit for each body (what "transfer dV" is measured from)
+MOONS = {
+    "Gilly": "Eve",
+    "Ike": "Duna",
+    "Laythe": "Jool",
+    "Vall": "Jool",
+    "Tylo": "Jool",
+    "Bop": "Jool",
+    "Pol": "Jool",
+}
+
+
+def _reference_orbit(body: str) -> str:
+    """Describe the reference orbit for a body's transfer dV."""
+    if body in MOONS:
+        parent = MOONS[body]
+        return f"{parent} low orbit"
+    return "Kerbin low orbit (80km)"
+
+
+def _valid_bodies() -> str:
+    """Comma-separated list of known body names."""
+    return ", ".join(sorted(BODIES.keys()))
+
 
 def build_map() -> dict:
     """Build the full dV map."""
@@ -181,10 +205,13 @@ def body_info(name: str) -> dict:
     """Return dV data for a single body."""
     b = BODIES.get(name)
     if not b:
-        return {"error": f"Unknown body: {name}"}
+        return {"error": f"Unknown body: {name}. Known bodies: {_valid_bodies()}"}
+
+    ref_orbit = _reference_orbit(name)
     return {
         "name": name,
-        "transfer_dV_from_Kerbin": b["transfer"],
+        "reference_orbit": ref_orbit,
+        "transfer_dV_from_reference": b["transfer"],
         "capture_dV": b["capture"],
         "landing_dV": b["landing"],
         "ascent_dV": b["ascent"],

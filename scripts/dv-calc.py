@@ -90,17 +90,18 @@ def calc(args: argparse.Namespace) -> dict:
 
         vessel = data.get("vessel", {})
         mass = vessel.get("mass", {})
-        result["total_wet_mass"] = mass.get("total", 0.0)
-        result["total_dry_mass"] = mass.get("dry", 0.0)
+        # Use JSON mass data as defaults for CLI args if not provided
+        json_wet = mass.get("total", 0.0)
+        json_dry = mass.get("dry", 0.0)
         result["payload_mass"] = mass.get("payload", args.payload)
 
         # If no CLI ISP/stages, try to infer from resources or set defaults
         if args.isp is None:
             args.isp = "350"
         if args.wet is None:
-            args.wet = str(result["total_wet_mass"])
+            args.wet = str(json_wet)
         if args.dry is None:
-            args.dry = str(result["total_dry_mass"])
+            args.dry = str(json_dry)
         if args.stages is None:
             args.stages = 1
 
