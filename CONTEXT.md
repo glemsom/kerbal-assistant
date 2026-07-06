@@ -32,7 +32,9 @@ All absolute paths. A new agent must read this section first.
 | Agent docs | `docs/agents/` |
 | Architecture decisions | `docs/adr/` |
 | Custom skills | `skills/` |
+| Vessel operations skill | `skills/vessel-operations.md` |
 | Automation scripts | `scripts/` |
+| Live telemetry script | `scripts/live-telemetry.py` |
 | Install tools | `setup/` |
 
 ## Language
@@ -70,6 +72,9 @@ _Avoid_: "auto-pilot" (hyphen)
 **Maneuver Node**:
 A planned orbit change in KSP defined by prograde, normal, and radial delta-V components at a specific universal time. kRPC can create, read, execute, and remove nodes.
 
+**Vessel Operations**:
+Interpreting live telemetry data — orbital parameters, vessel situation, biome, staging guidance, and burn timing. Skill: `skills/vessel-operations.md`.
+
 ## Skill domains
 
 **Mission Guidance**:
@@ -83,3 +88,6 @@ Calculating and budgeting delta-V for transfers, landings, and returns using the
 
 **Contract Strategy**:
 Which contracts to accept, how to stack objectives, and how to maximize career progression efficiency.
+
+**Vessel Operations**:
+Interpreting vessel telemetry — orbital parameters, situation awareness, biome science, when to stage/burn, and error conditions. Reference: `skills/vessel-operations.md`.
