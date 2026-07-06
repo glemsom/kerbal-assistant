@@ -4,6 +4,7 @@
 Usage:
     python scripts/live-telemetry.py
     python scripts/live-telemetry.py --vessel "Station Alpha"
+    python scripts/live-telemetry.py --minify
 
 Outputs JSON to stdout. Exits with non-zero on error.
 """
@@ -93,8 +94,8 @@ def get_telemetry(conn, target_name=None):
             },
         },
         "position": {
-            "latitude": round(surface_flight.latitude, 6) if hasattr(surface_flight, "latitude") else None,
-            "longitude": round(surface_flight.longitude, 6) if hasattr(surface_flight, "longitude") else None,
+            "latitude": round(surface_flight.latitude, 6),
+            "longitude": round(surface_flight.longitude, 6),
         },
         "time": {
             "ut": round(sc.ut, 2),
@@ -133,10 +134,11 @@ def get_telemetry(conn, target_name=None):
 def main():
     parser = argparse.ArgumentParser(description="Get live KSP vessel telemetry")
     parser.add_argument("--vessel", "-v", help="Target vessel name (default: active vessel)")
+    parser.add_argument("--minify", action="store_true", help="Output compact JSON (no indentation)")
     args = parser.parse_args()
 
     try:
-        conn = krpc.connect(name="kerbal-assistant-telemetry", address="127.0.0.1", rpc_port=50000, stream_port=50001)
+        conn = krpc.connect(name="kerbal-assistant-telemetry", address="127.0.0.1", rpc_port=50000)
     except ConnectionRefusedError:
         print(json.dumps({"error": "KSP not running or kRPC not responding (ConnectionRefusedError)"}))
         sys.exit(1)
@@ -149,7 +151,8 @@ def main():
 
     data = get_telemetry(conn, target_name=args.vessel)
 
-    json.dump(data, sys.stdout, indent=2)
+    indent = None if args.minify else 2
+    json.dump(data, sys.stdout, indent=indent)
     sys.stdout.write("\n")
 
     if "error" in data:
