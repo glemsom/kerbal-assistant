@@ -28,6 +28,7 @@ All absolute paths. A new agent must read this section first.
 |---|---|
 | Repo root | `~/Documents/git/kerbal-assistant/` |
 | Domain glossary | `CONTEXT.md` (this file) |
+| Usage guide | `USAGE.md` |
 | Agent skills config | `AGENTS.md` |
 | Agent docs | `docs/agents/` |
 | Architecture decisions | `docs/adr/` |
