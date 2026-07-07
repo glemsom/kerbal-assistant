@@ -92,11 +92,47 @@ Science experiments give different results per biome. Maximize science by visiti
 ### Staging in kRPC
 
 ```python
+# Inspect stage structure before staging
+current_stage = v.control.current_stage  # e.g. 4
+stage_parts = v.parts.in_stage(current_stage)  # parts in this stage
+
 # Stage and get list of jettisoned parts
 jettisoned = v.control.activate_next_stage()
 # Check if staging actually did something
 if not jettisoned:
     print("No parts to stage!")
+```
+
+⚠️ **Gotcha:** When a decoupler fires, the jettisoned parts become their own
+Vessel. `activate_next_stage()` returns them as **Vessel** objects (not Part).
+Use `.name` not `.title`.
+
+### Detecting fuel depletion per stage (burnout detection)
+
+```python
+def stage_fuel_empty(vessel):
+    """Return True if current stage has no fuel in any resource."""
+    stage_num = vessel.control.current_stage
+    stage_parts = vessel.parts.in_stage(stage_num)
+    for part in stage_parts:
+        for resource in part.resources.all:
+            if resource.amount > 0.001 and resource.density > 0:
+                return False
+    return True
+
+# Use in a loop to detect burnout
+while not stage_fuel_empty(v):
+    time.sleep(0.5)
+# Stage to jettison spent boosters
+v.control.activate_next_stage()
+```
+
+### Checking engine state after staging
+
+```python
+for part in v.parts.all:
+    if part.engine and part.engine.active:
+        print(f"{part.title}: active, thrust={part.engine.thrust:.0f}N, fuel={part.engine.has_fuel}")
 ```
 
 ## Error Conditions

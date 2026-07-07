@@ -40,6 +40,12 @@ Default ports: RPC=50000, Stream=50001. Configure in KSP → kRPC toolbar.
 | `.rails_warp_factor` | `int` | Set rails warp (0-7) |
 | `.warp_rate` | `float` | Current warp rate (1.0 = 1x) |
 | `.transform_position(p, from_ref, to_ref)` | `(x,y,z)` | Coordinate transform |
+| `.launch_vessel(directory, name, site, recover, crew)` | — | Launch from VAB/SPH (⚠️ param order: craft_directory, name, launch_site, recover, crew) |
+| `.launch_vessel_from_vab(name, recover=True)` | — | Launch VAB craft to LaunchPad (preferred) |
+| `.launch_vessel_from_sph(name, recover=True)` | — | Launch SPH craft to Runway (preferred) |
+| `.launchable_vessels(directory)` | `list[str]` | Craft names in `"VAB"` or `"SPH"` |
+| `.can_revert_to_launch()` | `bool` | Check if revert to launch is available |
+| `.revert_to_launch()` | — | Revert to launch without returning to KSC |
 
 > **Gotchas:** SpaceCenter has no `game_scene` attr in v0.5.4. `.warp_rate` throws
 > when not in flight scene. Always wrap `active_vessel` access.
@@ -68,11 +74,12 @@ v = conn.space_center.active_vessel
 | `.met` | `float` | Mission elapsed time (s) |
 | `.resources` | `Resources` | All resources |
 | `.parts` | `list[Part]` | All parts |
+| `.parts.in_stage(n)` | `list[Part]` | Parts in stage `n` (launch clamps excluded) |
 | `.control.rcs` | `bool` | Toggle RCS |
 | `.control.sas` | `bool` | Toggle SAS |
 | `.control.sas_mode` | `SASMode` | SAS mode |
 | `.control.throttle` | `float` | Set throttle (0.0-1.0) |
-| `.control.activate_next_stage()` | `list[Part]` | Stage |
+| `.control.activate_next_stage()` | `list[Part/Vessel]` | Stage (⚠️ jettisoned decouplers return as Vessel, not Part) |
 | `.control.add_node(ut, prograde, normal, radial)` | `Node` | Create maneuver node |
 | `.control.nodes` | `list[Node]` | All maneuver nodes |
 | `.control.remove_nodes()` | — | Remove all nodes |

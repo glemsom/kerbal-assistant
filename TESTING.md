@@ -110,7 +110,7 @@ Can you help me design one and launch it?
 |-----------|-------|
 | KSP scene | Space Center (KSC) |
 | Active vessel | None (at KSC) |
-| Available craft | A simple 2-stage rocket in VAB named "Simple Orbiter 1" |
+| Available craft | A simple rocket in VAB (any name — agent must query via `--list`. NOTE: the default craft is suborbital-only; agent must detect inadequate dV and suggest building a proper orbital rocket.) |
 | Career/Sandbox | Sandbox preferred (no part unlock constraints) |
 | kRPC server | Started |
 
@@ -126,7 +126,7 @@ Can you help me design one and launch it?
    - Ask user to build it in VAB (since Pi cannot build craft)
 
 2. **Launch phase** (after user confirms craft exists)
-   - Load craft: `python scripts/launch-vessel.py "Simple Orbiter 1"`
+   - Load craft: `python scripts/launch-vessel.py "<craft-name>"` (name from `--list` output)
    - Launch: `python scripts/auto-ascent.py --target-apo 100000`
 
 ### Expected output shape
@@ -155,6 +155,91 @@ Pi should:
 | `.pi/skills/ascent-profiles.md` | Launch parameters, TWR targets |
 | `.pi/skills/delta-v-planning.md` | dV budget, Tsiolkovsky equation |
 | `.pi/skills/krpc-reference.md` | Script APIs, connection patterns |
+
+---
+
+## Scenario: Staging validation
+
+Tests the agent's ability to manage multi-stage launches — inspecting stage
+structure, detecting burnout, sequencing stage activation, and verifying
+thrust/mass changes at each transition.
+
+### User prompt
+
+```
+We need to test your ability to use stages. Launch the current rocket,
+and validate you can make use of the stages correctly.
+```
+
+### Preconditions
+
+| Condition | Value |
+|-----------|-------|
+| KSP scene | LaunchPad (pre_launch) |
+| Active vessel | A multi-stage rocket on launchpad, stage >= 3, with at least one SRB stage + decouplers + liquid engine |
+| Craft manifest | 3x SRB (stage 3), 3x decoupler (stage 2), 1x LV-T45 (stage 1), core (stage 0) |
+| Career/Sandbox | Sandbox |
+| kRPC server | Started |
+
+### Expected Pi actions (in order)
+
+1. **Inspect stage structure**
+   - Read `v.control.current_stage`
+   - List parts per stage with `v.parts.in_stage(n)`
+   - Identify engines, decouplers, fuel resources per stage
+
+2. **First stage activation**
+   - `activate_next_stage()` at highest stage
+   - Verify SRBs ignite (thrust > 0, mass change)
+   - Verify liftoff (positive climb rate)
+
+3. **SRB burnout detection**
+   - Monitor `stage_fuel_empty()` or equivalent
+   - Detect when SolidFuel depleted in current stage
+   - Report burnout (altitude, speed, burn duration)
+
+4. **SRB jettison**
+   - Stage to fire decouplers
+   - Verify mass decreases, spent boosters separate
+   - Note that `activate_next_stage()` returns Vessel objects for jettisoned stages
+
+5. **Center engine activation**
+   - Stage to ignite LV-T45
+   - Verify engine state (active=true, has_fuel=true, thrust > 0)
+
+6. **Fuel burn monitoring**
+   - Track LiquidFuel/Oxidizer consumption
+   - Verify thrust increases with altitude (vacuum Isp effect)
+
+7. **Cleanup**
+   - Kill throttle, disengage autopilot, enable SAS
+
+### Expected output shape
+
+Pi should emit JSON events per phase (via `log_event()` or similar):
+- Structure map of stages before liftoff
+- Each staging event with before/after metrics
+- Burnout detection with timestamp and altitude
+- Final summary of all stage transitions
+
+### Pass criteria
+
+- [ ] Pi reads `current_stage` and `parts.in_stage()` before launch
+- [ ] Pi identifies all engines and fuel per stage
+- [ ] Pi activates first stage -> SRBs ignite -> liftoff confirmed
+- [ ] Pi detects SRB burnout via fuel depletion check
+- [ ] Pi stages to jettison spent SRBs -> mass drops, thrust changes
+- [ ] Pi activates center engine -> LV-T45 running, fuel consumed
+- [ ] Pi monitors fuel burn over at least 3 ticks
+- [ ] Pi kills throttle and disengages autopilot after test
+- [ ] Pi avoids `p.title` on jettisoned parts (they're Vessel, not Part)
+
+### Skills that should be loaded
+
+| Skill | Why |
+|-------|-----|
+| `.pi/skills/krpc-reference.md` | kRPC staging API, `activate_next_stage()`, `parts.in_stage()` |
+| `.pi/skills/vessel-operations.md` | When to stage, staging patterns, burnout detection |
 
 ---
 
@@ -204,6 +289,7 @@ Checks: Pi detects script failure, explains problem, suggests fix.
 |------------|----------|-----------------|----------------|
 | Rocket design | Build + launch | ascent-profiles, delta-v-planning | dv-calc, launch-vessel |
 | Autonomous ascent | Build + launch | ascent-profiles, krpc-reference | auto-ascent |
+| Staging management | Staging validation | krpc-reference, vessel-operations | staging-test (or inline) |
 | dV budgeting | dV feasibility, Transfer | delta-v-planning, krpc-reference | telemetry, dv-map, dv-calc |
 | Transfer windows | Transfer to Minmus | delta-v-planning | transfer-window, create-node |
 | Career management | Career pulse | career-strategy | save-parser |

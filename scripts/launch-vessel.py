@@ -130,7 +130,10 @@ def launch_vessel(args: argparse.Namespace) -> None:
         launch_site = args.site
 
     try:
-        sc.launch_vessel(facility, name, launch_site, recover)
+        if facility == "SPH":
+            sc.launch_vessel_from_sph(name, recover)
+        else:
+            sc.launch_vessel_from_vab(name, recover)
     except Exception as e:
         log_event("error", message=f"Launch failed: {e}")
         sys.exit(1)
