@@ -90,6 +90,35 @@ python scripts/auto-ascent.py \
   --heading 90
 ```
 
+### Kerbin to 200 km orbit (high-orbit launch)
+
+```bash
+python scripts/auto-ascent.py \
+  --target-apo 200000 \
+  --target-peri 180000 \
+  --final-pitch 5 \
+  --max-q 15000 \
+  --heading 90
+```
+
+Higher apoapsis needs more horizontal speed. Same turn profile as 100 km
+(atmospheric phase identical); extra dV comes from circularization burn.
+
+### GDLV3 (SRB-assisted launch to 200 km)
+
+```bash
+python scripts/auto-ascent.py \
+  --target-apo 200000 \
+  --target-peri 180000 \
+  --turn-start 250 \
+  --turn-end 40000 \
+  --final-pitch 5 \
+  --max-q 15000 \
+  --heading 90 \
+  --srb-boosters 30
+```
+```
+
 ### Mun to 100 km orbit
 
 ```bash

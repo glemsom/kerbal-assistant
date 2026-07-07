@@ -16,6 +16,7 @@ import json
 import signal
 import sys
 import time
+import math
 from typing import Any
 
 try:
@@ -111,6 +112,7 @@ def should_stage(vessel: Any) -> bool:
     if thrust < 1.0:
         if vessel.control.current_stage <= 0:
             return False
+        _max_thrust_seen = 0   # reset baseline after staging
         _last_stage_time = now
         return True
 
@@ -126,6 +128,7 @@ def should_stage(vessel: Any) -> bool:
                 if vessel.control.current_stage <= 0:
                     return False
                 _last_stage_time = now
+                _max_thrust_seen = 0  # reset baseline after SRB jettison
                 log_event("srb_jettison",
                           thrust_ratio=round(thrust_ratio, 3),
                           max_thrust=round(_max_thrust_seen, 1),
@@ -137,6 +140,7 @@ def should_stage(vessel: Any) -> bool:
         if now - _liftoff_time > _srb_boosters:
             if vessel.control.current_stage > 0:
                 _last_stage_time = now
+                _max_thrust_seen = 0  # reset baseline after timed jettison
                 log_event("srb_timed_jettison",
                           elapsed=round(now - _liftoff_time, 1),
                           srb_boosters=_srb_boosters)
@@ -361,6 +365,21 @@ def auto_ascent(args: argparse.Namespace) -> None:
               v_apo=round(v_apo, 1),
               burn_dv=round(burn_dv, 1))
 
+    # Check if we have enough fuel for circularization
+    # Tsiolkovsky: dV = Isp * g0 * ln(m0 / m1)
+    remaining_fuel_kg = vessel.mass - vessel.dry_mass
+    isp_est = 345  # vac Isp estimate
+    g0 = 9.81
+    max_dv = 0.0
+    if remaining_fuel_kg > 0 and vessel.dry_mass > 0:
+        max_dv = isp_est * g0 * math.log(vessel.mass / vessel.dry_mass)
+    
+    if 0 < max_dv < burn_dv * 0.8:
+        log_event("warn", message="Insufficient fuel for full circularization",
+                  max_dv=round(max_dv, 1), needed=round(burn_dv, 1),
+                  fuel_kg=round(remaining_fuel_kg, 1))
+        burn_dv = min(burn_dv, max_dv * 0.9)  # use 90% of what we have
+
     # Create node and execute — guard against negative time_to_apoapsis
     t_apo = vessel.orbit.time_to_apoapsis
     if t_apo < 0:
@@ -373,10 +392,55 @@ def auto_ascent(args: argparse.Namespace) -> None:
     ap.target_direction = node.burn_vector(frame)
     ap.wait()
 
-    # Execute burn at fixed 30 % throttle for stability
+    # Calculate burn time, start at full throttle, taper near end
+    mass = vessel.mass
+    isp = 345  # Terrier vac Isp (estimate)
+    g0 = 9.81
+    # F = Isp * g0 * mass_flow_rate => mass_flow = F / (Isp * g0)
+    # Burn time = (1 - exp(-dV / (Isp*g0))) * initial_mass / mass_flow_rate...
+    # Simpler: dv = Isp*g0*ln(m0/m1) => m1 = m0/exp(dV/(Isp*g0))
+    # fuel_kg = m0 - m1
+    m0 = mass
+    m1 = m0 / (2.71828 ** (burn_dv / (isp * g0)))
+    fuel_kg = m0 - m1
+    thrust = vessel.max_thrust
+    if thrust > 0:
+        mass_flow = thrust / (isp * g0)
+        burn_time = fuel_kg / mass_flow if mass_flow > 0 else 30
+    else:
+        burn_time = 30
+    burn_time = min(burn_time, 120)  # cap at 2 minutes
+    log_event("burn_info", burn_dv=round(burn_dv, 1), burn_time=round(burn_time, 1))
+
+    # Execute burn: full throttle but check for fuel depletion
+    vessel.control.throttle = 1.0
+    burn_start_time = time.time()
+    last_dv = node.remaining_delta_v
+    stale_counter = 0
     while node.remaining_delta_v > 0.5:
-        vessel.control.throttle = 0.3
+        # Detect fuel depletion: thrust drops to near zero mid-burn
+        if vessel.available_thrust < 1.0 and node.remaining_delta_v > 5:
+            log_event("warn", message="Thrust lost during circularization — possible fuel depletion",
+                      remaining_dv=round(node.remaining_delta_v, 1))
+            break
+        # Detect stall: remaining_dv not decreasing
+        current_dv = node.remaining_delta_v
+        if abs(current_dv - last_dv) < 0.01:
+            stale_counter += 1
+        else:
+            stale_counter = 0
+        last_dv = current_dv
+        if stale_counter > 50:  # ~2.5s with no change
+            log_event("warn", message="Burn stalled — no dV decrease",
+                      remaining_dv=round(current_dv, 1))
+            break
+        # Throttle down near end for precision
+        if current_dv < 10 and node.remaining_delta_v < 10:
+            vessel.control.throttle = 0.2
         time.sleep(0.05)
+    
+    elapsed = time.time() - burn_start_time
+    log_event("burn_complete", elapsed=round(elapsed, 1), final_thrust=round(vessel.available_thrust, 0))
 
     vessel.control.throttle = 0.0
     node.remove()
