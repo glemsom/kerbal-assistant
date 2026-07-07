@@ -88,8 +88,9 @@ v = conn.space_center.active_vessel
 
 ```python
 ap = v.auto_pilot
-ap.target_pitch_and_heading(pitch, heading)
-ap.target_direction(direction_tuple)
+ap.target_pitch_and_heading(pitch, heading)  # method
+ap.reference_frame = some_ref_frame          # set before target_direction
+ap.target_direction = (x, y, z)              # PROPERTY, not a method!
 ap.engage()
 ap.disengage()
 ap.wait()
@@ -100,11 +101,19 @@ ap.wait()
 | `.engage()` | Activate autopilot |
 | `.disengage()` | Release control |
 | `.wait()` | Block until target attitude reached |
-| `.target_pitch_and_heading(pitch, heading)` | Set pitch (0°=horizon, 90°=zenith) and heading (0°=north, 90°=east) |
-| `.target_direction(tuple)` | Direction vector `(x,y,z)` |
-| `.reference_frame` | Reference frame for direction |
+| `.target_pitch_and_heading(pitch, heading)` | **Method** — set pitch (0°=horizon, 90°=zenith) and heading (0°=north, 90°=east) |
+| `.target_direction` | **PROPERTY** (tuple) — direction vector `(x,y,z)`. **Assign, don't call.** |
+| `.reference_frame` | Reference frame — **must set before assigning `target_direction`** |
 | `.error` | `(pitch,yaw,roll)` error from target |
 | `.sas` | bool — use SAS for attitude hold |
+
+> **⚠️ Gotcha (kRPC 0.5.x):** `target_direction` is a **property** (tuple), *not a method*.
+> Wrong: `ap.target_direction(dir, frame)` → `TypeError: 'tuple' object is not callable`
+> Correct:
+> ```python
+> ap.reference_frame = frame
+> ap.target_direction = dir_tuple
+> ```
 
 ### Orbit
 

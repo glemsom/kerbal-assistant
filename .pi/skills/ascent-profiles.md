@@ -132,3 +132,28 @@ For a body not listed, compute:
 2. **Turn end:** ~60% of atmo depth for atmo bodies, higher for airless.
 3. **Final pitch:** 5° for thick atmo, 15° for thin, 0° for airless.
 4. **Max Q:** Body g × 1000 for rough estimate.
+
+## Multi-Stage Ascent Notes
+
+### Staging Logic (`auto-ascent.py`)
+
+The script handles staging automatically. The `should_stage()` function activates the next stage when:
+1. Vessel thrust drops to zero (engines burned out)
+2. A 1-second cooldown has passed (prevents double-staging during transitions)
+3. Stages remain (not at stage 0/parachutes)
+
+This avoids the common error of premature staging through decoupler-only stages while SRBs are still burning.
+
+### Typical Multi-Stage Profiles
+
+| Layout | Staging order | Notes |
+|---|---|---|
+| SRBs + sustainer | SRBs fire → decouple SRBs → sustainer fires | SRBs should burn out before decouple |
+| Asparagus | All engines → drop empty tanks sequentially | Auto-ascent stages when thrust drops |
+| 2-stage (vacuum) | Lower stage → decouple → upper stage | Circularization on upper stage |
+
+### Troubleshooting
+
+- **Parachutes deploy during ascent:** Staging reached stage 0 prematurely. Check that SRBs/thrusters burn long enough before staging triggers. The `should_stage()` fix prevents this by only staging when thrust is zero.
+- **Vessel won't lift off:** TWR < 1.0 or wrong staging. Check engine staging in VAB.
+- **Decouplers fire too early:** SRBs still burning when staging fires. Either reduce `turn_start_alt` (to get SRBs burning longer at low altitude) or ensure SRBs have enough fuel to burn until staging.

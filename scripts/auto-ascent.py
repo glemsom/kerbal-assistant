@@ -81,15 +81,29 @@ def connect() -> krpc.Client:
     return _conn
 
 
-def stage_fuel_empty(vessel: Any) -> bool:
-    """Return True if current stage has no more fuel in any resource."""
-    # Check all parts in the current stage
-    stage_num = vessel.control.current_stage
-    stage_parts = vessel.parts.in_stage(stage_num)
-    for part in stage_parts:
-        for resource in part.resources.all:
-            if resource.amount > 0.001 and resource.density > 0:
-                return False
+_last_stage_time = 0.0
+
+
+def should_stage(vessel: Any) -> bool:
+    """Return True if we should activate next stage.
+
+    Stages when the vessel has no thrust AND there are remaining stages.
+    This avoids premature staging through decoupler-only stages while
+    SRBs or sustainer engines are still burning.
+    """
+    global _last_stage_time
+    now = time.time()
+    # Cooldown: wait 1s after last stage to avoid double-staging
+    # during engine ignition transitions
+    if now - _last_stage_time < 1.0:
+        return False
+    # Still accelerating — don't stage
+    if vessel.available_thrust > 1.0:
+        return False
+    # No more stages left
+    if vessel.control.current_stage <= 0:
+        return False
+    _last_stage_time = now
     return True
 
 
@@ -189,18 +203,16 @@ def auto_ascent(args: argparse.Namespace) -> None:
         max_q = max(max_q, dyn_pressure)
 
         # Check for staging
-        if stage_fuel_empty(vessel):
-            # Stage if there's another stage to go
+        if should_stage(vessel):
             try:
                 vessel.control.activate_next_stage()
                 stage_num += 1
                 log_event("stage", stage=stage_num, altitude=round(altitude, 1))
                 time.sleep(0.3)
             except Exception:
-                # No more stages — abort if truly empty
-                if stage_fuel_empty(vessel):
-                    log_event("error", message="All stages depleted — aborting ascent")
-                    sys.exit(1)
+                # No more stages — can't stage further, abort
+                log_event("error", message="Staging failed — aborting ascent")
+                sys.exit(1)
 
         # Dynamic throttle: limit by dynamic pressure and G-force
         target_throttle = 1.0
@@ -281,8 +293,10 @@ def auto_ascent(args: argparse.Namespace) -> None:
               periapsis=round(vessel.orbit.periapsis_altitude, 1))
 
     # Orient to prograde for circularization
+    # NOTE: target_direction is a PROPERTY (tuple), not a method in kRPC 0.5.x
+    ap.reference_frame = vessel.orbital_reference_frame
     flight = vessel.flight(vessel.orbital_reference_frame)
-    ap.target_direction(flight.prograde, vessel.orbital_reference_frame)
+    ap.target_direction = flight.prograde
     ap.wait()
 
     # Calculate required dV for circularization
@@ -311,7 +325,8 @@ def auto_ascent(args: argparse.Namespace) -> None:
     else:
         node = vessel.control.add_node(sc.ut + t_apo, prograde=burn_dv)
     frame = node.orbital_reference_frame
-    ap.target_direction(node.burn_vector(frame), frame)
+    ap.reference_frame = frame
+    ap.target_direction = node.burn_vector(frame)
     ap.wait()
 
     # Execute burn at fixed 30 % throttle for stability
