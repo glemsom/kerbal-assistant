@@ -1,0 +1,866 @@
+ship = SRB Orbiter
+version = 1.12.5
+description = 
+type = VAB
+size = 4.1556778,10.736639,3.982162
+steamPublishedFileId = 0
+persistentId = 233386374
+rot = 0,0,0,0
+missionFlag = Squad/Flags/default
+vesselType = Debris
+OverrideDefault = False,False,False,False
+OverrideActionControl = 0,0,0,0
+OverrideAxisControl = 0,0,0,0
+OverrideGroupNames = ,,,
+
+PART
+{
+	part = mk1pod.v2_219858525
+	partName = Part
+	persistentId = 219858525
+	pos = -0.117464766,16.8527088,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,16.8527088,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = radialDrogue_354392217
+	link = radialDrogue_134853785
+	link = parachuteSingle_873475997
+	link = GooExperiment_834737927
+	link = sasModule_811274233
+	attN = bottom,sasModule_811274233_0|-0.40503791|0_0|-1|0_0|-0.40503791|0_0|-1|0
+	attN = top,parachuteSingle_873475997_0|0.642375588|0_0|1|0_0|0.642375588|0_0|1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		ToggleSameVesselInteraction
+		{
+			actionGroup = None
+			wasActiveBeforePartWasAdjusted = False
+		}
+		SetSameVesselInteraction
+		{
+			actionGroup = None
+			wasActiveBeforePartWasAdjusted = False
+		}
+	}
+}
+
+PART
+{
+	part = radialDrogue_354392217
+	partName = Part
+	persistentId = 354392217
+	pos = -0.495754004,17.2267818,-0.175915703
+	attPos = 0,0,0
+	attPos0 = -0.495754004,17.2267818,-0.175915703
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 0
+	resPri = 0
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		Deploy
+		{
+			actionGroup = Abort
+		}
+	}
+}
+
+PART
+{
+	part = radialDrogue_134853785
+	partName = Part
+	persistentId = 134853785
+	pos = 0.117700204,17.2267818,0.0719828457
+	attPos = 0,0,0
+	attPos0 = 0.117700204,17.2267818,0.0719828457
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 0
+	resPri = 0
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		Deploy
+		{
+			actionGroup = Abort
+		}
+	}
+}
+
+PART
+{
+	part = parachuteSingle_873475997
+	partName = Part
+	persistentId = 873475997
+	pos = -0.117464766,17.5101662,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,17.5101662,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 0
+	resPri = 0
+	dstg = 0
+	sidx = 1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		Deploy
+		{
+			actionGroup = None
+		}
+	}
+}
+
+PART
+{
+	part = GooExperiment_834737927
+	partName = Part
+	persistentId = 834737927
+	pos = -0.402487934,16.9548321,-0.458584189
+	attPos = 0,0,0
+	attPos0 = -0.402487934,16.9548321,-0.458584189
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		RunTest
+		{
+			actionGroup = Custom01
+		}
+	}
+}
+
+PART
+{
+	part = sasModule_811274233
+	partName = Part
+	persistentId = 811274233
+	pos = -0.117464766,16.3565598,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,16.3565598,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = fuelTank_325388554
+	attN = bottom,fuelTank_325388554_0|-0.0911109|0_0|-0.5|0_0|-0.0911109|0_0|-0.5|0
+	attN = top,mk1pod.v2_219858525_0|0.0911109|0_0|0.5|0_0|0.0911109|0_0|0.5|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = fuelTank_325388554
+	partName = Part
+	persistentId = 325388554
+	pos = -0.117464766,15.2837238,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,15.2837238,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = fuelTank_407192631
+	attN = top,sasModule_811274233_0|0.981724977|0_0|1|0_0|0.981724977|0_0|1|0
+	attN = bottom,fuelTank_407192631_0|-0.912500024|0_0|-1|0_0|-0.912500024|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = fuelTank_407192631
+	partName = Part
+	persistentId = 407192631
+	pos = -0.117464766,13.3894987,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,13.3894987,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = fuelTank_179511256
+	attN = top,fuelTank_325388554_0|0.981724977|0_0|1|0_0|0.981724977|0_0|1|0
+	attN = bottom,fuelTank_179511256_0|-0.912500024|0_0|-1|0_0|-0.912500024|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = fuelTank_179511256
+	partName = Part
+	persistentId = 179511256
+	pos = -0.117464766,11.4952736,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,11.4952736,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = fuelTank_639073196
+	link = radialDecoupler_608728547
+	link = radialDecoupler_152958078
+	link = basicFin_536932441
+	link = basicFin_365894724
+	link = basicFin_603212323
+	attN = top,fuelTank_407192631_0|0.981724977|0_0|1|0_0|0.981724977|0_0|1|0
+	attN = bottom,fuelTank_639073196_0|-0.912500024|0_0|-1|0_0|-0.912500024|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = fuelTank_639073196
+	partName = Part
+	persistentId = 639073196
+	pos = -0.117464766,9.60104942,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,9.60104942,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = liquidEngine2.v2_643508743
+	link = basicFin_265211318
+	link = basicFin_471234607
+	link = basicFin_278810847
+	attN = top,fuelTank_179511256_0|0.981724977|0_0|1|0_0|0.981724977|0_0|1|0
+	attN = bottom,liquidEngine2.v2_643508743_0|-0.912500024|0_0|-1|0_0|-0.912500024|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = liquidEngine2.v2_643508743
+	partName = Part
+	persistentId = 643508743
+	pos = -0.117464766,8.68855,-0.22905539
+	attPos = 0,0,0
+	attPos0 = -0.117464766,8.68855,-0.22905539
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Radial
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 1
+	resPri = 0
+	dstg = 0
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+		ToggleEngine
+		{
+			actionGroup = None
+		}
+	}
+}
+
+PART
+{
+	part = basicFin_265211318
+	partName = Part
+	persistentId = 265211318
+	pos = -0.184710339,9.09055996,-0.832760453
+	attPos = 0,0,0
+	attPos0 = -0.184710339,9.09055996,-0.832760453
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = basicFin_471234607
+	partName = Part
+	persistentId = 471234607
+	pos = -0.60666585,9.09055996,0.131033614
+	attPos = 0,0,0
+	attPos0 = -0.60666585,9.09055996,0.131033614
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = basicFin_278810847
+	partName = Part
+	persistentId = 278810847
+	pos = 0.43898201,9.09055996,0.0145607591
+	attPos = 0,0,0
+	attPos0 = 0.43898201,9.09055996,0.0145607591
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = radialDecoupler_608728547
+	partName = Part
+	persistentId = 608728547
+	pos = -0.665403128,10.9021721,-0.507408202
+	attPos = 0,0,0
+	attPos0 = -0.665403128,10.9021721,-0.507408202
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 2
+	resPri = 0
+	dstg = 1
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = solidBooster.sm.v2_214042074
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = solidBooster.sm.v2_214042074
+	partName = Part
+	persistentId = 214042074
+	pos = -1.42400694,10.6471672,-0.766087055
+	attPos = 0,0,0
+	attPos0 = -1.42400694,10.6471672,-0.766087055
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 3
+	resPri = 0
+	dstg = 2
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = noseCone_459302554
+	attN = bottom,Null_0_0|-0.997500002|0_0|-1|0_0|-0.997500002|0_0|-1|0
+	attN = top,noseCone_459302554_0|0.757499993|0_0|1|0_0|0.757499993|0_0|1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = noseCone_459302554
+	partName = Part
+	persistentId = 459302554
+	pos = -1.42400706,11.4046679,-0.766087055
+	attPos = 0,0,0
+	attPos0 = -1.42400706,11.4046679,-0.766087055
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 3
+	resPri = 0
+	dstg = 2
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	attN = bottom01,solidBooster.sm.v2_214042074_0|0|0_0|-1|0_0|0|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = radialDecoupler_152958078
+	partName = Part
+	persistentId = 152958078
+	pos = -0.0845561177,10.9021721,0.384649575
+	attPos = 0,0,0
+	attPos0 = -0.0845561177,10.9021721,0.384649575
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 2
+	resPri = 0
+	dstg = 1
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = solidBooster.sm.v2_449628897
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = solidBooster.sm.v2_449628897
+	partName = Part
+	persistentId = 449628897
+	pos = 0.0707235932,10.6471672,1.17096472
+	attPos = 0,0,0
+	attPos0 = 0.0707235932,10.6471672,1.17096472
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 3
+	resPri = 0
+	dstg = 2
+	sidx = 0
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	link = noseCone_461042546
+	attN = bottom,Null_0_0|-0.997500002|0_0|-1|0_0|-0.997500002|0_0|-1|0
+	attN = top,noseCone_461042546_0|0.757499993|0_0|1|0_0|0.757499993|0_0|1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = noseCone_461042546
+	partName = Part
+	persistentId = 461042546
+	pos = 0.0707235932,11.4046679,1.17096829
+	attPos = 0,0,0
+	attPos0 = 0.0707235932,11.4046679,1.17096829
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = 3
+	resPri = 0
+	dstg = 2
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 0
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	attN = bottom01,solidBooster.sm.v2_449628897_0|0|0_0|-1|0_0|0|0_0|-1|0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = basicFin_536932441
+	partName = Part
+	persistentId = 536932441
+	pos = -0.266221702,11.4029303,-0.832759857
+	attPos = 0,0,0
+	attPos0 = -0.266221702,11.4029303,-0.832759857
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = basicFin_365894724
+	partName = Part
+	persistentId = 365894724
+	pos = -0.565909684,11.4029303,0.2016242
+	attPos = 0,0,0
+	attPos0 = -0.565909684,11.4029303,0.2016242
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
+
+PART
+{
+	part = basicFin_603212323
+	partName = Part
+	persistentId = 603212323
+	pos = 0.479737163,11.4029303,-0.0560304672
+	attPos = 0,0,0
+	attPos0 = 0.479737163,11.4029303,-0.0560304672
+	rot = 0,0,0,1
+	attRot = 0,0,0,1
+	attRot0 = 0,0,0,1
+	mir = 1,1,1
+	symMethod = Mirror
+	autostrutMode = Off
+	rigidAttachment = False
+	istg = -1
+	resPri = 0
+	dstg = 0
+	sidx = -1
+	sqor = -1
+	sepI = -1
+	attm = 1
+	sameVesselCollision = False
+	modCost = 0
+	modMass = 0
+	modSize = 0,0,0
+	EVENTS
+	{
+	}
+	ACTIONS
+	{
+	}
+}
