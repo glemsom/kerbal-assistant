@@ -9,6 +9,10 @@ description: Condensed kRPC API reference — connection setup, core services (S
 
 Condensed reference for writing kRPC scripts. Full docs at [krpc.github.io/krpc](https://krpc.github.io/krpc/).
 
+> **Health check:** Use `python scripts/ksp-status.py --all` to test connectivity.
+> Script handles null vessel, connection errors, outputs clean JSON.
+> Prefer existing scripts over inline Python for standard checks.
+
 ## Connection
 
 ```python
@@ -36,6 +40,10 @@ Default ports: RPC=50000, Stream=50001. Configure in KSP → kRPC toolbar.
 | `.rails_warp_factor` | `int` | Set rails warp (0-7) |
 | `.warp_rate` | `float` | Current warp rate (1.0 = 1x) |
 | `.transform_position(p, from_ref, to_ref)` | `(x,y,z)` | Coordinate transform |
+
+> **Gotchas:** SpaceCenter has no `game_scene` attr in v0.5.4. `.warp_rate` throws
+> when not in flight scene. Always wrap `active_vessel` access.
+
 
 ### Vessel
 
@@ -212,6 +220,34 @@ Common frames:
 
 ## Common Patterns
 
+### Connectivity check
+
+Prefer calling the existing script over inline Python:
+
+```bash
+.venv/bin/python scripts/ksp-status.py --all
+```
+The script handles null vessel, connection refused, and timeout gracefully.
+Outputs JSON. Exit 0 = connected, exit 1 = failure.
+
+If you must write inline Python, use `krpc_utils.get_active_vessel()`:
+
+```python
+import krpc
+import sys
+from scripts.krpc_utils import connect, get_active_vessel
+
+conn = connect()  # exits with JSON error on failure
+vessel = get_active_vessel(conn)  # None instead of ValueError
+
+if vessel:
+    print(f"Vessel: {vessel.name}")
+else:
+    print("No active vessel (KSC scene)")
+```
+
+
+
 ### Burn at a maneuver node
 
 ```python
@@ -247,10 +283,18 @@ orbital_pos = conn.space_center.transform_position(
 
 ```python
 import krpc
-conn = krpc.connect(name='stream-test')
+import sys
+from scripts.krpc_utils import get_active_vessel
+
+conn = krpc.connect(name="stream-test")
+vessel = get_active_vessel(conn)
+if not vessel:
+    print("No active vessel", file=sys.stderr)
+    sys.exit(1)
+
 # Create a stream for vessel altitude
-flight = conn.space_center.active_vessel.flight(conn.space_center.active_vessel.orbit.body.reference_frame)
-alt_stream = conn.add_stream(getattr, flight, 'mean_altitude')
+flight = vessel.flight(vessel.orbit.body.reference_frame)
+alt_stream = conn.add_stream(getattr, flight, "mean_altitude")
 # Read it
 alt_stream()  # returns current altitude
 # Remove when done
