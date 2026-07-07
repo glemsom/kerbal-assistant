@@ -496,7 +496,7 @@ PART
 	symMethod = Radial
 	autostrutMode = Off
 	rigidAttachment = False
-	istg = 1
+	024|	istg = 3
 	resPri = 0
 	dstg = 0
 	sidx = 0
