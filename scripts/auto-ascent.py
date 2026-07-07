@@ -84,6 +84,7 @@ def connect() -> krpc.Client:
 _last_stage_time = 0.0
 _max_thrust_seen = 0.0
 _srb_boosters = 0       # number of SRB boosters (from --srb-boosters flag)
+_liftoff_time = 0.0     # time of first stage (for timed SRB fallback)
 
 
 def should_stage(vessel: Any) -> bool:
@@ -96,7 +97,7 @@ def should_stage(vessel: Any) -> bool:
     Also stages when --srb-boosters N is set and N seconds have
     elapsed since liftoff (timed SRB jettison fallback).
     """
-    global _last_stage_time, _max_thrust_seen
+    global _last_stage_time, _max_thrust_seen, _srb_boosters, _liftoff_time
     now = time.time()
     # Cooldown: wait 1s after last stage to avoid double-staging
     # during engine ignition transitions
@@ -129,6 +130,16 @@ def should_stage(vessel: Any) -> bool:
                           thrust_ratio=round(thrust_ratio, 3),
                           max_thrust=round(_max_thrust_seen, 1),
                           current_thrust=round(thrust, 1))
+                return True
+
+    # --- Condition 3: timed fallback for SRB jettison ---
+    if _srb_boosters > 0 and _liftoff_time > 0:
+        if now - _liftoff_time > _srb_boosters:
+            if vessel.control.current_stage > 0:
+                _last_stage_time = now
+                log_event("srb_timed_jettison",
+                          elapsed=round(now - _liftoff_time, 1),
+                          srb_boosters=_srb_boosters)
                 return True
 
     # No more stages left (prevents staging into empty)
@@ -176,7 +187,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
               target_apo=args.target_apo,
               target_peri=args.target_peri)
 
-    global _srb_boosters
+    global _srb_boosters, _liftoff_time
     _srb_boosters = args.srb_boosters
 
     # -- Pre-launch checks ---------------------------------------------------
@@ -197,6 +208,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # Stage once to ignite engines
     vessel.control.activate_next_stage()
     log_event("liftoff", stage=1)
+    _liftoff_time = time.time()
 
     # Wait for positive TWR / gaining altitude
     start_time = time.time()
