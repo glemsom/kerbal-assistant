@@ -82,30 +82,70 @@ def connect() -> krpc.Client:
 
 
 _last_stage_time = 0.0
+_max_thrust_seen = 0.0
+_srb_boosters = 0       # number of SRB boosters (from --srb-boosters flag)
+_liftoff_time = 0.0     # time of first stage (for timed SRB fallback)
 
 
 def should_stage(vessel: Any) -> bool:
     """Return True if we should activate next stage.
 
-    Stages when the vessel has no thrust AND there are remaining stages.
-    This avoids premature staging through decoupler-only stages while
-    SRBs or sustainer engines are still burning.
+    Stages when:
+      1) Total thrust is zero (standard staging — sustainer cutoff)
+      2) SRB burnout detected: thrust drops by >50% from peak AND
+         SolidFuel is depleted but other fuel remains (SRB jettison)
+    Also stages when --srb-boosters N is set and N seconds have
+    elapsed since liftoff (timed SRB jettison fallback).
     """
-    global _last_stage_time
+    global _last_stage_time, _max_thrust_seen, _srb_boosters, _liftoff_time
     now = time.time()
     # Cooldown: wait 1s after last stage to avoid double-staging
     # during engine ignition transitions
     if now - _last_stage_time < 1.0:
         return False
-    # Still accelerating — don't stage
-    if vessel.available_thrust > 1.0:
-        return False
-    # No more stages left
+
+    thrust = vessel.available_thrust
+    _max_thrust_seen = max(_max_thrust_seen, thrust)
+
+    # --- Condition 1: zero thrust (standard staging) ---
+    if thrust < 1.0:
+        if vessel.control.current_stage <= 0:
+            return False
+        _last_stage_time = now
+        return True
+
+    # --- Condition 2: SRB burnout (thrust drop + SolidFuel depleted) ---
+    if _max_thrust_seen > 10.0:
+        thrust_ratio = thrust / _max_thrust_seen
+        if thrust_ratio < 0.5:
+            # Check if SolidFuel is depleted while other fuel remains
+            resources = vessel.resources
+            solid = resources.amount("SolidFuel")
+            liquid = resources.amount("LiquidFuel")
+            if solid < 0.1 and liquid > 1.0:
+                if vessel.control.current_stage <= 0:
+                    return False
+                _last_stage_time = now
+                log_event("srb_jettison",
+                          thrust_ratio=round(thrust_ratio, 3),
+                          max_thrust=round(_max_thrust_seen, 1),
+                          current_thrust=round(thrust, 1))
+                return True
+
+    # --- Condition 3: timed fallback for SRB jettison ---
+    if _srb_boosters > 0 and _liftoff_time > 0:
+        if now - _liftoff_time > _srb_boosters:
+            if vessel.control.current_stage > 0:
+                _last_stage_time = now
+                log_event("srb_timed_jettison",
+                          elapsed=round(now - _liftoff_time, 1),
+                          srb_boosters=_srb_boosters)
+                return True
+
+    # No more stages left (prevents staging into empty)
     if vessel.control.current_stage <= 0:
         return False
-    _last_stage_time = now
-    return True
-
+    return False
 
 def log_event(event: str, **kwargs: Any) -> None:
     msg = {"event": event, **kwargs}
@@ -147,6 +187,9 @@ def auto_ascent(args: argparse.Namespace) -> None:
               target_apo=args.target_apo,
               target_peri=args.target_peri)
 
+    global _srb_boosters, _liftoff_time
+    _srb_boosters = args.srb_boosters
+
     # -- Pre-launch checks ---------------------------------------------------
     situation = str(vessel.situation).split(".")[-1]
     if situation not in ("pre_launch", "landed", "flying"):
@@ -165,6 +208,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # Stage once to ignite engines
     vessel.control.activate_next_stage()
     log_event("liftoff", stage=1)
+    _liftoff_time = time.time()
 
     # Wait for positive TWR / gaining altitude
     start_time = time.time()
@@ -375,6 +419,9 @@ def main() -> None:
                         help="Max dynamic pressure in Pa before throttling down (default: 15000)")
     parser.add_argument("--heading", type=float, default=90,
                         help="Launch heading in degrees (default: 90 = East)")
+    parser.add_argument("--srb-boosters", type=int, default=0,
+                        help="Number of SRB boosters for timed burnout staging (default: 0)")
+
 
     args = parser.parse_args()
 
