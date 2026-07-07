@@ -531,7 +531,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
@@ -565,7 +565,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
@@ -599,7 +599,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
@@ -633,7 +633,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 2
@@ -668,7 +668,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 3
@@ -705,7 +705,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 3
@@ -740,7 +740,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 2
@@ -775,7 +775,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 3
@@ -812,7 +812,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = 3
@@ -847,7 +847,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
@@ -881,7 +881,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
@@ -915,7 +915,7 @@ PART
 	attRot = 0,0,0,1
 	attRot0 = 0,0,0,1
 	mir = 1,1,1
-	symMethod = MirrorSymmetry
+	symMethod = Mirror
 	autostrutMode = Off
 	rigidAttachment = False
 	istg = -1
