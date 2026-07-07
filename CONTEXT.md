@@ -44,6 +44,8 @@ All absolute paths. A new agent must read this section first.
 | Delta-V planning skill | `.pi/skills/delta-v-planning.md` |
 | Install tools | `setup/` |
 | Python venv (kRPC client) | `.venv/` (use `.venv/bin/python` to run scripts) |
+| Rocket designs | `rockets/` |
+| Orbital test rocket | `rockets/orbit-test-1.md` |
 ## Language
 
 **Skill**:
