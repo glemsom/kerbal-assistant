@@ -128,11 +128,11 @@ def should_stage(vessel: Any) -> bool:
                 if vessel.control.current_stage <= 0:
                     return False
                 _last_stage_time = now
-                _max_thrust_seen = 0  # reset baseline after SRB jettison
                 log_event("srb_jettison",
                           thrust_ratio=round(thrust_ratio, 3),
-                          max_thrust=round(_max_thrust_seen, 1),
+                          max_thrust=round(thrust, 1) if thrust <= 1 else round(_max_thrust_seen, 1),
                           current_thrust=round(thrust, 1))
+                _max_thrust_seen = 0  # reset baseline after SRB jettison
                 return True
 
     # --- Condition 3: timed fallback for SRB jettison ---
@@ -140,10 +140,10 @@ def should_stage(vessel: Any) -> bool:
         if now - _liftoff_time > _srb_boosters:
             if vessel.control.current_stage > 0:
                 _last_stage_time = now
-                _max_thrust_seen = 0  # reset baseline after timed jettison
                 log_event("srb_timed_jettison",
                           elapsed=round(now - _liftoff_time, 1),
                           srb_boosters=_srb_boosters)
+                _max_thrust_seen = 0  # reset baseline after timed jettison
                 return True
 
     # No more stages left (prevents staging into empty)
@@ -233,6 +233,9 @@ def auto_ascent(args: argparse.Namespace) -> None:
     # Stream altitude for responsive control
     alt_stream = conn.add_stream(getattr, vessel.flight(body.reference_frame), "mean_altitude")
     vel_stream = conn.add_stream(getattr, vessel.flight(body.reference_frame), "speed")
+    lf_stream = conn.add_stream(vessel.resources.amount, "LiquidFuel")
+    ox_stream = conn.add_stream(vessel.resources.amount, "Oxidizer")
+    sf_stream = conn.add_stream(vessel.resources.amount, "SolidFuel")
 
     max_q = 0.0
     max_g = 0.0
@@ -255,7 +258,12 @@ def auto_ascent(args: argparse.Namespace) -> None:
             try:
                 vessel.control.activate_next_stage()
                 stage_num += 1
-                log_event("stage", stage=stage_num, altitude=round(altitude, 1))
+                lf = lf_stream()
+                ox = ox_stream()
+                sf = sf_stream()
+                log_event("stage", stage=stage_num, altitude=round(altitude, 1),
+                          apo=round(apoapsis, 1), lf=round(lf, 1), ox=round(ox, 1),
+                          sf=round(sf, 1))
                 time.sleep(0.3)
             except Exception:
                 # No more stages — can't stage further, abort
@@ -287,6 +295,15 @@ def auto_ascent(args: argparse.Namespace) -> None:
         # Check if we've reached target apoapsis
         orbit = vessel.orbit
         apoapsis = orbit.apoapsis_altitude if orbit else 0.0
+
+        # Telemetry every 5km
+        if int(altitude) % 5000 < 50:
+            lf = lf_stream()
+            ox = ox_stream()
+            sf = sf_stream()
+            log_event("telemetry", alt=round(altitude, 1), spd=round(speed, 1),
+                      apo=round(apoapsis, 1), lf=round(lf, 1), ox=round(ox, 1),
+                      sf=round(sf, 1), thrust=round(vessel.available_thrust, 0))
 
         if apoapsis >= args.target_apo * 0.98:
             log_event("coast_start",
@@ -322,17 +339,34 @@ def auto_ascent(args: argparse.Namespace) -> None:
         log_event("coast_resume",
                   apoapsis=round(vessel.orbit.apoapsis_altitude, 1))
 
-    # Warp to apoapsis if far away
+    # Warp to apoapsis if far away — retry as altitude climbs
     time_to_apo = vessel.orbit.time_to_apoapsis
     if time_to_apo > 30:
         warp_start = max(time_to_apo - 30, 1)
-        sc.warp_to(sc.ut + warp_start)
-        log_event("warp", warp_duration=round(warp_start, 1))
+        # Check warp eligibility every few seconds (atmo clears as we climb)
+        while vessel.orbit.time_to_apoapsis > 30:
+            alt = vessel.flight(body.reference_frame).mean_altitude
+            can_warp = not has_atmo or alt >= 70000
+            if can_warp:
+                sc.warp_to(sc.ut + max(vessel.orbit.time_to_apoapsis - 30, 1))
+                log_event("warp", warp_duration=round(warp_start, 1))
+                break
+            log_event("coast_wait",
+                      time_to_apo=round(vessel.orbit.time_to_apoapsis, 1),
+                      alt=round(alt, 1))
+            time.sleep(1.0)
 
-    # Wait until T-30s to apoapsis
+    # Wait until T-30s to apoapsis (with progress logging)
+    last_log = 0.0
     while True:
         if vessel.orbit.time_to_apoapsis <= 30:
             break
+        tta = vessel.orbit.time_to_apoapsis
+        if tta - last_log > 30:
+            log_event("coast_progress",
+                      time_to_apo=round(tta, 1),
+                      alt=round(vessel.flight(body.reference_frame).mean_altitude, 1))
+            last_log = tta
         time.sleep(0.1)
 
     # -- Circularization burn -------------------------------------------------
@@ -340,14 +374,7 @@ def auto_ascent(args: argparse.Namespace) -> None:
               apoapsis=round(vessel.orbit.apoapsis_altitude, 1),
               periapsis=round(vessel.orbit.periapsis_altitude, 1))
 
-    # Orient to prograde for circularization
-    # NOTE: target_direction is a PROPERTY (tuple), not a method in kRPC 0.5.x
-    ap.reference_frame = vessel.orbital_reference_frame
-    flight = vessel.flight(vessel.orbital_reference_frame)
-    ap.target_direction = flight.prograde
-    ap.wait()
-
-    # Calculate required dV for circularization
+    # Calculate required dV for circularization BEFORE creating node
     # Use vis-viva to get actual speed at apoapsis (not current position)
     mu = body.gravitational_parameter
     r = vessel.orbit.apoapsis  # distance from body center at apoapsis
@@ -380,13 +407,13 @@ def auto_ascent(args: argparse.Namespace) -> None:
                   fuel_kg=round(remaining_fuel_kg, 1))
         burn_dv = min(burn_dv, max_dv * 0.9)  # use 90% of what we have
 
-    # Create node and execute — guard against negative time_to_apoapsis
+    # Create node with min 15s buffer so node is never in past
     t_apo = vessel.orbit.time_to_apoapsis
-    if t_apo < 0:
-        log_event("warn", message="Past apoapsis — burning immediately")
-        node = vessel.control.add_node(sc.ut + 10, prograde=burn_dv)
-    else:
-        node = vessel.control.add_node(sc.ut + t_apo, prograde=burn_dv)
+    node_time = max(t_apo, 15) if t_apo >= 0 else 15
+    node = vessel.control.add_node(sc.ut + node_time, prograde=burn_dv)
+    log_event("node_created", burn_dv=round(burn_dv, 1),
+              node_time=round(node_time, 1),
+              t_apo=round(t_apo, 1))
     frame = node.orbital_reference_frame
     ap.reference_frame = frame
     ap.target_direction = node.burn_vector(frame)
@@ -418,13 +445,18 @@ def auto_ascent(args: argparse.Namespace) -> None:
     last_dv = node.remaining_delta_v
     stale_counter = 0
     while node.remaining_delta_v > 0.5:
+        current_dv = node.remaining_delta_v
+        # Sanity check: if remaining_dv > 5 * burn_dv, something is wrong
+        if current_dv > burn_dv * 5:
+            log_event("warn", message="Node remaining_dv looks wrong — aborting burn",
+                      remaining_dv=round(current_dv, 1), burn_dv=round(burn_dv, 1))
+            break
         # Detect fuel depletion: thrust drops to near zero mid-burn
-        if vessel.available_thrust < 1.0 and node.remaining_delta_v > 5:
+        if vessel.available_thrust < 1.0 and current_dv > 5:
             log_event("warn", message="Thrust lost during circularization — possible fuel depletion",
-                      remaining_dv=round(node.remaining_delta_v, 1))
+                      remaining_dv=round(current_dv, 1))
             break
         # Detect stall: remaining_dv not decreasing
-        current_dv = node.remaining_delta_v
         if abs(current_dv - last_dv) < 0.01:
             stale_counter += 1
         else:
