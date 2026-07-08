@@ -99,29 +99,16 @@ for ((i=1; i<=ITERATIONS; i++)); do
   TASK_TMPFILE=$(mktemp)
   cat "$TASK_FILE" > "$TASK_TMPFILE"
 
-  # Run pi with task (fresh context per iteration) — with timeout
+  # Run pi with task (fresh context per iteration) — with timeout, live output
   TMP_OUTPUT=$(mktemp)
   echo "  ▶ Starting pi (timeout=${ITER_TIMEOUT}s, model=${MODEL})..."
-  echo -n "  "
 
-  # Run pi in background, show progress dots every 30s
-  (
-    timeout "$ITER_TIMEOUT" pi \
-      --session-id "$SESSION_ID" \
-      --model "$MODEL" \
-      @"$TASK_TMPFILE" \
-      2>&1
-  ) > "$TMP_OUTPUT" &
-  PI_PID=$!
-
-  while kill -0 "$PI_PID" 2>/dev/null; do
-    echo -n "."
-    sleep 30
-  done
-  echo ""
-
-  wait "$PI_PID"
-  EXIT_CODE=$?
+  timeout "$ITER_TIMEOUT" pi \
+    --session-id "$SESSION_ID" \
+    --model "$MODEL" \
+    @"$TASK_TMPFILE" \
+    2>&1 | tee "$TMP_OUTPUT"
+  EXIT_CODE=${PIPESTATUS[0]}
   DURATION=$(( $(date +%s) - START_AT ))
   rm -f "$TASK_TMPFILE"
 
