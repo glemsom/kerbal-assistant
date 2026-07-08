@@ -135,6 +135,53 @@ for part in v.parts.all:
         print(f"{part.title}: active, thrust={part.engine.thrust:.0f}N, fuel={part.engine.has_fuel}")
 ```
 
+### Re-entry staging: separating re-entry vehicle
+
+Before parachute deploy, separate the re-entry vehicle (pod + science + heat shield) from upper stage if a decoupler exists between them.
+
+```python
+# After de-orbit burn, before re-entry
+# Stage to fire payload decoupler (separates pod from upper stage)
+# The decoupler and parachute should be in separate VAB stages
+v.control.activate_next_stage()  # fires decoupler, pod separates
+time.sleep(2.0)  # wait for separation
+# Continue coasting — upper stage burns up, pod descends alone
+
+# Later, when conditions met: deploy chute
+if alt < 5000 and speed < 400:
+    v.control.activate_next_stage()  # deploys parachute
+```
+
+**Staging setup in VAB for pod-with-decoupler designs:**
+
+| Stage | Action |
+|-------|--------|
+| 2 | Main engine ignition + launch clamps release |
+| 1 | Interstage decoupler + upper stage engine ignition |
+| 0 | **Payload decoupler** + parachute deploy (separate stages if chute deploy timing matters) |
+
+**Common mistake:** Having the payload decoupler and parachute in the same stage → decoupler fires AND chute deploys simultaneously, which can cause the chute to rip off or tangle. Keep them separate.
+
+### RCS Usage
+
+| Action | kRPC | Notes |
+|--------|------|-------|
+| Enable RCS | `v.control.rcs = True` | Must have Monopropellant and RCS thrusters |
+| Disable RCS | `v.control.rcs = False` | |
+| Translation (fine) | `v.control.forward = 0.5` / `v.control.up = 0.0` | Range -1.0 to 1.0 |
+| Rotation via RCS | SAS handles this when RCS enabled + SAS active | RCS provides extra torque if reaction wheels insufficient |
+
+Use RCS when:
+- Reaction wheels lack torque for orientation (heavy/tall craft)
+- Docking/rendezvous fine translation
+- Countering spin from asymmetric thrust
+- SAS + RCS together give strongest attitude control
+
+```python
+v.control.rcs = True
+v.control.sas = True
+v.control.sas_mode = v.control.sas_mode.prograde
+```
 ## Error Conditions
 
 | Symptom | Likely cause | Fix |

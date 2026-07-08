@@ -2,3 +2,4 @@
 2026-07-08 21:02:03 | iter=2 | dur=218s | exit=0 | score=5 → | changes="created rockets/kerbal-1-5.md, updated rockets/README.md, added 80km Kerbin profile and prerequisites to ascent-profiles.md, added kerbal-1-5-mission.py reference to landing-profiles.md"
 2026-07-08 21:03:56 | iter=3 | dur=113s | exit=0 | score=5 → | changes="none needed"
 2026-07-08 21:05:50 | iter=4 | dur=114s | exit=0 | score=8 → | changes=none needed
+2026-07-08 21:07:55 | iter=5 | dur=125s | exit=0 | score=8 → | changes="added re-entry staging separation guidance and RCS usage patterns to vessel-operations.md"
