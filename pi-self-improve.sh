@@ -20,6 +20,9 @@ MODEL="opencode-go/mimo-v2.5-pro"
 ITER_TIMEOUT=300
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# ---- trap signals ----
+trap 'echo ""; echo "  ✋ Cancelled by user"; kill 0 2>/dev/null; exit 130' INT TERM
+
 # ---- helpers ----
 usage() {
   echo "Usage: $0 [--iterations|-n N] [--session-base <name>] [--model <model>] [--timeout <sec>] --task|-t <task.md>"
