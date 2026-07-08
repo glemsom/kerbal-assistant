@@ -53,10 +53,10 @@ cd "$REPO_ROOT"
 # Verify it's a git repo
 git rev-parse --git-dir &>/dev/null || { echo "ERROR: Not a git repository"; exit 1; }
 
-# Check for unstaged changes before starting
+# Warn about dirty state — task file changes are read into memory
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo "WARNING: Uncommitted changes detected. Stashing..."
-  git stash --include-untracked || true
+  echo "NOTE: Dirty working tree. Uncommitted changes will be included in iteration 1 commit."
+  echo "      To start clean: git stash push -m 'pre-selfimprove'"
 fi
 
 RESULTS_FILE="${SCRIPT_DIR}/self-improve-results-$(date +%Y%m%d-%H%M%S).log"
