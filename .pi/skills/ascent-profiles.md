@@ -107,6 +107,13 @@ Same turn profile as 75/100 km. Circularization burn ~40-60 m/s.
 Kerbal 1-5-specific: LV-T30 Reliant lower stage (no gimbal) + Terrier upper.
 Fins + SAS provide stability.
 
+Post-orbit: run `scripts/kerbal-1-5-mission.py` for de-orbit burn + re-entry + parachute landing.
+Complete pipeline:
+```bash
+.venv/bin/python scripts/auto-ascent.py --target-apo 80000 --target-peri 70000
+.venv/bin/python scripts/kerbal-1-5-mission.py
+```
+
 NOTE: 75-100 km orbits need ~3 350 m/s dV (atmospheric phase identical to 200 km).
 Any rocket with >3 500 m/s post-loss dV can reach them.
 

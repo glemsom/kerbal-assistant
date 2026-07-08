@@ -110,12 +110,17 @@ python scripts/deorbit-calc.py --vessel "Orbit Test 1" --target-pe 35000 --burn-
 Typical deorbit dV from 75 km LKO: ~35-55 m/s retrograde at apoapsis.
 Burn with upper stage, then decouple payload for re-entry.
 
-For automated mission: use `scripts/kerbal-1-5-mission.py` after ascent. 
-Script handles circularization, de-orbit at apoapsis, and parachute deployment.
-Phases: circularize (peri ≥ 70 km) → coast → de-orbit (peri ≤ 35 km) → re-entry + land.
+For automated Kerbal 1-5 mission: run auto-ascent.py first, then kerbal-1-5-mission.py:
 
-Heat shield only required for higher-energy returns (Mun/Minmus/Duna).
+```bash
+.venv/bin/python scripts/auto-ascent.py --target-apo 80000 --target-peri 70000
+.venv/bin/python scripts/kerbal-1-5-mission.py
+```
 
+`kerbal-1-5-mission.py` handles circularization (checks if peri ≥ 70 km, skips if done),
+de-orbit at apoapsis (retrograde burn to peri ≤ 35 km), and parachute landing.
+
+Phases: circularize → coast → de-orbit → re-entry + parachute deploy (< 5 km, < 400 m/s) → land.
 For return from interplanetary (e.g., Duna return to Kerbin):
 - Set PE to 50-60 km altitude in Kerbin's atmosphere
 - Multiple passes if needed (raise PE between passes via small burn)
