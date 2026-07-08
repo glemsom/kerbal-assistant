@@ -26,3 +26,14 @@ Print a FINAL SUMMARY line as the last line of output:
 
 ```
 FINAL SUMMARY: SCORE=8 SUMMARY="Reached orbit at XXX km"
+
+## Feedback
+
+Run Pi with streaming output visible. Without `-p` flag, or use `tee`:
+
+```
+pi --session-id improve -p 'Execute improve-task.md' 2>&1 | tee /tmp/pi-improve.log
+```
+
+Watch the terminal — Pi prints all reasoning, commands, and results live.
+Interrupt if it goes off-course, but let it finish normally for full evaluation.
