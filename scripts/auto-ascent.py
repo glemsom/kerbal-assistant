@@ -209,8 +209,15 @@ def auto_ascent(args: argparse.Namespace) -> None:
     vessel.control.throttle = 1.0
     time.sleep(0.5)
 
-    # Stage once to ignite engines
-    vessel.control.activate_next_stage()
+    # Stage repeatedly until engines fire (handles empty initial stages)
+    for _ in range(20):
+        vessel.control.activate_next_stage()
+        if vessel.available_thrust > 1.0:
+            break
+        time.sleep(0.2)
+    else:
+        log_event("error", message="Failed to ignite engines after 20 staging attempts")
+        sys.exit(1)
     log_event("liftoff", stage=1)
     _liftoff_time = time.time()
 

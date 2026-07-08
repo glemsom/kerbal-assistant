@@ -21,7 +21,7 @@ ITER_TIMEOUT=300
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # ---- trap signals ----
-trap 'echo ""; echo "  ✋ Cancelled by user"; kill 0 2>/dev/null; exit 130' INT TERM
+trap 'echo ""; echo "  ✋ Cancelled by user"; exit 130' INT TERM
 
 # ---- helpers ----
 usage() {
@@ -109,6 +109,8 @@ for ((i=1; i<=ITERATIONS; i++)); do
   timeout "$ITER_TIMEOUT" pi \
     --session-id "$SESSION_ID" \
     --model "$MODEL" \
+    --print \
+    --exclude-tools bash \
     @"$TASK_TMPFILE" \
     2>&1 | tee "$TMP_OUTPUT"
   EXIT_CODE=${PIPESTATUS[0]}

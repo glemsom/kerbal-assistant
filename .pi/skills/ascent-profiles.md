@@ -78,6 +78,21 @@ Minimum TWR for launch:
 
 ## Quick Reference
 
+### Kerbin to 75 km orbit
+
+```bash
+python scripts/auto-ascent.py \
+  --target-apo 75000 \
+  --turn-start 250 \
+  --turn-end 40000 \
+  --final-pitch 5 \
+  --max-q 15000 \
+  --heading 90
+```
+
+NOTE: 75-100 km orbits need ~3 350 m/s dV (atmospheric phase identical to 200 km).
+Any rocket with >3 500 m/s post-loss dV can reach them.
+
 ### Kerbin to 100 km orbit
 
 ```bash

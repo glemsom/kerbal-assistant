@@ -93,6 +93,25 @@ if vessel.flight().mean_altitude <= burn_start_alt and vertical_speed > 5:
 
 ### Aerobraking capture
 
+### LKO re-entry (75-100 km orbit)
+
+No heat shield needed. Mk1 pod thermal tolerance sufficient for LKO returns.
+Re-entry speed ~2 300-2 500 m/s — well within pod limits.
+Mk16 parachute deploys below 5 000 m for soft landing (splashdown or ground).
+
+**Deorbit burn**: Use `scripts/deorbit-calc.py` to compute dV:
+```bash
+python scripts/deorbit-calc.py --apo 75000 --peri 75000 --body Kerbin --target-pe 35000 --burn-at-apo
+```
+Or live from vessel:
+```bash
+python scripts/deorbit-calc.py --vessel "Orbit Test 1" --target-pe 35000 --burn-at-apo
+```
+Typical deorbit dV from 75 km LKO: ~35-55 m/s retrograde at apoapsis.
+Burn with upper stage, then decouple payload for re-entry.
+
+Heat shield only required for higher-energy returns (Mun/Minmus/Duna).
+
 For return from interplanetary (e.g., Duna return to Kerbin):
 - Set PE to 50-60 km altitude in Kerbin's atmosphere
 - Multiple passes if needed (raise PE between passes via small burn)
