@@ -10,6 +10,7 @@ dV budgets, staging orders, ascent profiles, and .craft files when available.
 | File | Description |
 |---|---|
 | `orbit-test-1.md` | First orbital test — 200 km Kerbin orbit, 2-stage liquid rocket |
+| `kerbal-1-5.md` | Kerbal 1-5 — 80 km Kerbin orbit and return, 2-stage liquid rocket |
 
 ## Purpose
 

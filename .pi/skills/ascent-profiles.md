@@ -90,6 +90,23 @@ python scripts/auto-ascent.py \
   --heading 90
 ```
 
+### Kerbin to 80 km orbit (Kerbal 1-5)
+
+```bash
+python scripts/auto-ascent.py \
+  --target-apo 80000 \
+  --target-peri 70000 \
+  --turn-start 250 \
+  --turn-end 40000 \
+  --final-pitch 5 \
+  --max-q 15000 \
+  --heading 90
+```
+
+Same turn profile as 75/100 km. Circularization burn ~40-60 m/s.
+Kerbal 1-5-specific: LV-T30 Reliant lower stage (no gimbal) + Terrier upper.
+Fins + SAS provide stability.
+
 NOTE: 75-100 km orbits need ~3 350 m/s dV (atmospheric phase identical to 200 km).
 Any rocket with >3 500 m/s post-loss dV can reach them.
 
@@ -133,6 +150,24 @@ python scripts/auto-ascent.py \
   --srb-boosters 30
 ```
 ```
+
+## Prerequisites
+
+Before running auto-ascent.py, verify:
+
+| Check | Command | Expected |
+|---|---|---|
+| KSP running + kRPC server | `python -c "import krpc; krpc.connect()"` | No error (ConnectionRefused → KSP not running) |
+| Vessel on launchpad | Check situation | `pre_launch` or `landed` |
+| Staging correct | VAB staging order matches engine ignition | Stage with engine fires first |
+| TWR > 1.0 | dv-calc or manual check | Launch TWR ≥ 1.2 recommended |
+| Sufficient dV | dv-calc or dV map | ≥ 3 500 m/s for LKO |
+
+Common failures:
+- kRPC not running → start KSP, load save, check kRPC status in Tracking Station
+- Wrong active vessel → switch to correct vessel in KSP
+- Staging reversed → verify in VAB that engines are in correct stage order
+
 
 ### Mun to 100 km orbit
 

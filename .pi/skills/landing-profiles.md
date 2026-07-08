@@ -110,6 +110,10 @@ python scripts/deorbit-calc.py --vessel "Orbit Test 1" --target-pe 35000 --burn-
 Typical deorbit dV from 75 km LKO: ~35-55 m/s retrograde at apoapsis.
 Burn with upper stage, then decouple payload for re-entry.
 
+For automated mission: use `scripts/kerbal-1-5-mission.py` after ascent. 
+Script handles circularization, de-orbit at apoapsis, and parachute deployment.
+Phases: circularize (peri ≥ 70 km) → coast → de-orbit (peri ≤ 35 km) → re-entry + land.
+
 Heat shield only required for higher-energy returns (Mun/Minmus/Duna).
 
 For return from interplanetary (e.g., Duna return to Kerbin):
