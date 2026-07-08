@@ -8,7 +8,7 @@
 #   3. Commits any skill changes to git
 #
 # Usage:
-#   ./pi-self-improve.sh --task <task.md> [--iterations N] [--session-base <name>]
+#   ./pi-self-improve.sh --task <task.md> [--iterations N] [--session-base <name>] [--model <model>] [--timeout <sec>]
 
 set -euo pipefail
 
@@ -16,16 +16,20 @@ set -euo pipefail
 ITERATIONS=10
 TASK_FILE=""
 SESSION_BASE="selfimprove"
+MODEL="opencode-go/mimo-v2.5-pro"
+ITER_TIMEOUT=300
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # ---- helpers ----
 usage() {
-  echo "Usage: $0 [--iterations|-n N] [--session-base <name>] --task|-t <task.md>"
+  echo "Usage: $0 [--iterations|-n N] [--session-base <name>] [--model <model>] [--timeout <sec>] --task|-t <task.md>"
   echo ""
   echo "Options:"
   echo "  -t, --task <file>       Task file (markdown, required)"
-  echo "  -n, --iterations <N>    Iteration count (default: 10)"
+  echo "  -n, --iterations <N>    Iteration count (default: $ITERATIONS)"
   echo "  --session-base <name>   Prefix for pi session IDs (default: selfimprove)"
+  echo "  --model <model>         Pi model to use (default: opencode-go/mimo-v2.5-pro)"
+  echo "  --timeout <sec>         Per-iteration timeout in seconds (default: $ITER_TIMEOUT)"
   echo "  -h, --help              Show this message"
   exit 1
 }
@@ -36,6 +40,8 @@ while [[ $# -gt 0 ]]; do
     --iterations|-n) ITERATIONS="$2"; shift 2 ;;
     --task|-t)       TASK_FILE="$2"; shift 2 ;;
     --session-base)  SESSION_BASE="$2"; shift 2 ;;
+    --model)         MODEL="$2"; shift 2 ;;
+    --timeout)       ITER_TIMEOUT="$2"; shift 2 ;;
     --help|-h)       usage ;;
     *)               echo "ERROR: Unknown argument '$1'"; usage ;;
   esac
@@ -44,6 +50,7 @@ done
 # ---- validate ----
 [[ -f "$TASK_FILE" ]] || { echo "ERROR: Task file not found: $TASK_FILE"; exit 1; }
 [[ "$ITERATIONS" =~ ^[0-9]+$ ]] && [[ "$ITERATIONS" -gt 0 ]] || { echo "ERROR: Iterations must be positive integer, got '$ITERATIONS'"; exit 1; }
+[[ "$ITER_TIMEOUT" =~ ^[0-9]+$ ]] && [[ "$ITER_TIMEOUT" -gt 0 ]] || { echo "ERROR: Timeout must be positive integer, got '$ITER_TIMEOUT'"; exit 1; }
 command -v pi &>/dev/null || { echo "ERROR: 'pi' command not found. Install Pi agent first."; exit 1; }
 
 # ---- setup ----
@@ -60,7 +67,6 @@ if [[ -n "$(git status --porcelain)" ]]; then
 fi
 
 RESULTS_FILE="${SCRIPT_DIR}/self-improve-results-$(date +%Y%m%d-%H%M%S).log"
-TASK_CONTENT="$(cat "$TASK_FILE")"
 TASK_BASENAME="$(basename "$TASK_FILE")"
 
 # ---- header ----
@@ -69,37 +75,93 @@ echo "  Pi Self-Improve Loop"
 echo "  Repo:      $REPO_ROOT"
 echo "  Task:      $TASK_FILE"
 echo "  Iterations: $ITERATIONS"
+echo "  Model:     $MODEL"
+echo "  Timeout:   ${ITER_TIMEOUT}s/iter"
 echo "  Results:   $RESULTS_FILE"
 echo "==========================================="
 echo ""
 
 # ---- loop ----
+PREV_SCORE=
+
 for ((i=1; i<=ITERATIONS; i++)); do
-  echo "--- Iteration $i/$ITERATIONS ---"
+  echo ""
+  echo "═══════════════════════════════════════════"
+  echo "  Iteration $i/$ITERATIONS"
+  echo "  Session:  ${SESSION_BASE}-iter${i}"
+  echo "  Time:     $(date '+%H:%M:%S')"
+  echo "═══════════════════════════════════════════"
 
   SESSION_ID="${SESSION_BASE}-iter${i}"
   START_AT="$(date +%s)"
 
-  # Run pi with task (fresh context per iteration)
-  OUTPUT="$(pi --session-id "$SESSION_ID" -p "$TASK_CONTENT" 2>&1)"
+  # Write task to temp file for @file syntax
+  TASK_TMPFILE=$(mktemp)
+  cat "$TASK_FILE" > "$TASK_TMPFILE"
+
+  # Run pi with task (fresh context per iteration) — with timeout
+  TMP_OUTPUT=$(mktemp)
+  echo "  ▶ Starting pi (timeout=${ITER_TIMEOUT}s, model=${MODEL})..."
+  echo -n "  "
+
+  # Run pi in background, show progress dots every 30s
+  (
+    timeout "$ITER_TIMEOUT" pi \
+      --session-id "$SESSION_ID" \
+      --model "$MODEL" \
+      @"$TASK_TMPFILE" \
+      2>&1
+  ) > "$TMP_OUTPUT" &
+  PI_PID=$!
+
+  while kill -0 "$PI_PID" 2>/dev/null; do
+    echo -n "."
+    sleep 30
+  done
+  echo ""
+
+  wait "$PI_PID"
   EXIT_CODE=$?
   DURATION=$(( $(date +%s) - START_AT ))
+  rm -f "$TASK_TMPFILE"
 
-  # Parse FINAL SUMMARY line
-  SUMMARY="$(echo "$OUTPUT" | grep "^FINAL SUMMARY:" | tail -1)"
+  # Parse FINAL SUMMARY line from output
+  SUMMARY="$(grep "^FINAL SUMMARY:" "$TMP_OUTPUT" | tail -1)"
   if [[ -z "$SUMMARY" ]]; then
     SCORE="??"
     CHANGES="no-summary-line"
-    echo "  WARN: No FINAL SUMMARY line in output (exit=$EXIT_CODE)"
-    echo "  -- Last 5 lines of output --"
-    echo "$OUTPUT" | tail -5
+    echo "  ⚠ WARN: No FINAL SUMMARY line (exit=$EXIT_CODE)"
+    if [[ $EXIT_CODE -eq 124 ]]; then
+      echo "  ── TIMEOUT after ${ITER_TIMEOUT}s ──"
+    else
+      echo "  ── Last 10 lines of output ──"
+      tail -10 "$TMP_OUTPUT"
+    fi
   else
     SCORE="$(echo "$SUMMARY" | sed 's/.*SCORE=//' | sed 's/[[:space:]].*//' || echo "parse-error")"
     CHANGES="$(echo "$SUMMARY" | sed 's/.*CHANGES=//' || echo "parse-error")"
   fi
+  rm -f "$TMP_OUTPUT"
 
-  LOG_LINE="$(date +%Y-%m-%d\ %H:%M:%S) | iter=$i | dur=${DURATION}s | exit=$EXIT_CODE | score=$SCORE | changes=$CHANGES"
-  echo "  $LOG_LINE"
+  # Score progression arrow
+  DELTA=
+  if [[ -n "$PREV_SCORE" && "$SCORE" != "??" && "$PREV_SCORE" != "??" ]]; then
+    if (( $(echo "$SCORE > $PREV_SCORE" | bc -l 2>/dev/null || echo 0) )); then
+      DELTA=" ↑"
+    elif (( $(echo "$SCORE < $PREV_SCORE" | bc -l 2>/dev/null || echo 0) )); then
+      DELTA=" ↓"
+    else
+      DELTA=" →"
+    fi
+  fi
+  PREV_SCORE="$SCORE"
+
+  LOG_LINE="$(date +%Y-%m-%d\ %H:%M:%S) | iter=$i | dur=${DURATION}s | exit=$EXIT_CODE | score=$SCORE$DELTA | changes=$CHANGES"
+  echo ""
+  echo "  ── Result ──────────────────────────────"
+  echo "  Duration: ${DURATION}s  |  Exit: $EXIT_CODE"
+  echo "  Score:    ${SCORE}${DELTA}  |  Changes: $CHANGES"
+  echo "  ────────────────────────────────────────"
   echo "$LOG_LINE" >> "$RESULTS_FILE"
 
   # Git commit any changes
@@ -108,7 +170,7 @@ for ((i=1; i<=ITERATIONS; i++)); do
     git commit -m "self-improve: iter $i/$ITERATIONS score=$SCORE" \
                -m "Task: $TASK_BASENAME" \
                -m "Duration: ${DURATION}s | Changes: $CHANGES" \
-               2>/dev/null || echo "  (nothing to commit)"
+               2>/dev/null || echo "  (commit: nothing new)"
   else
     echo "  (no file changes)"
   fi
