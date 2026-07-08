@@ -110,7 +110,6 @@ for ((i=1; i<=ITERATIONS; i++)); do
     --session-id "$SESSION_ID" \
     --model "$MODEL" \
     --print \
-    --exclude-tools bash \
     @"$TASK_TMPFILE" \
     2>&1 | tee "$TMP_OUTPUT"
   EXIT_CODE=${PIPESTATUS[0]}
