@@ -5,13 +5,9 @@ description: Strategic guidance for KSP career mode — contract stacking, tech 
 
 # Career Strategy Reference
 
-## Overview
-
-Strategic guidance for KSP career mode — maximising funds, science, and reputation through smart contract management, mission stacking, and tech tree priorities.
-
 ## Reading Career State
 
-Use `scripts/save-parser.py <path-to-persistent.sfs>` to get structured JSON of the current career state. Pipe through `jq` for targeted queries:
+Use `scripts/save-parser.py <path-to-persistent.sfs>` → structured JSON. Pipe through `jq`:
 
 ```bash
 # Quick financial pulse
@@ -27,181 +23,159 @@ python scripts/save-parser.py /path/to/persistent.sfs | jq '.tech_nodes[] | sele
 ## Contract Strategy
 
 ### Contract Stacking
+Accept contracts sharing objectives — #1 efficiency lever. Stack 3 "crew report from Mun orbit" contracts in 1 mission instead of 3.
 
-Accept multiple contracts that share objectives. This is the #1 efficiency lever in career mode.
-
-**Example stack:** If 3 contracts all want "crew report from Mun orbit", you can complete them in one mission instead of three. This multiplies your payout while costing the same fuel and time.
-
-**High-value stack combos:**
+**High-value combos:**
 
 | Stack target | Contract types to accept |
 |---|---|
-| **Mun flyby** | Explore Mun + Plant flag on Mun (counts if you land) + Crew report from Mun orbit |
-| **Minmus science** | Explore Minmus + Return science from Minmus + Crew report from Minmus + Temperature scan from Minmus |
-| **Station building** | Build station in orbit around Kerbin + Station with 5 crew capacity + Station with power generation |
-| **Satellite network** | Put satellite in orbit around Mun + Put satellite with antenna + Communications network milestone |
+| **Mun flyby** | Explore Mun + Plant flag (counts if land) + Crew report from Mun orbit |
+| **Minmus science** | Explore Minmus + Return science + Crew report + Temperature scan |
+| **Station building** | Build station in Kerbin orbit + 5 crew capacity + power generation |
+| **Satellite network** | Put satellite in Mun orbit + with antenna + Comms milestone |
 
 ### What to Decline
 
-| Contract type | Why |
+| Type | Why |
 |---|---|
-| **Part tests on the runway** | Low payout, zero science, boring |
-| **Rescue from orbit** (early game) | Your rescue ship becomes a debris problem unless you have claw/KAS |
-| **Tourist contracts** (without a taxi) | Need dedicated crew cabin, often marginal payout unless stacked |
-| **Survey contracts** | Hunting for specific biomes at specific altitudes is tedious and time-consuming |
-| **Build new VAB building** | Costs more than it pays, delay tier-3 R&D |
+| **Runway part tests** | Low payout, zero science |
+| **Rescue from orbit** (early) | Rescue ship becomes debris without claw/KAS |
+| **Tourist contracts** (no taxi) | Need crew cabin, marginal |
+| **Survey contracts** | Tedious biome hunting |
+| **Build new VAB** | Costs more than pays |
 
-### Contract Acceptance Flow
-
-1. Open contracts tab, sort by expiry
-2. Scan for shared objectives (same body, same biome, same activity)
+### Acceptance Flow
+1. Open contracts, sort by expiry
+2. Scan for shared objectives (same body/biome/activity)
 3. Accept all compatible contracts
-4. Quick maths: total advance ≥ fuel cost of mission? If yes, proceed
+4. Quick maths: total advance ≥ fuel cost? Proceed.
 5. Decline single-purpose contracts that don't stack
 
 ## Tech Tree Priorities
 
 ### First priority nodes
 
-| Node | Why unlock first |
+| Node | Why |
 |---|---|
-| **Basic Rocketry** | Free, gives Flea booster and basic pod |
-| **Engineering 101** | Unlocks T-30 "Reliant" (first good LF engine) and first science parts (mystery goo, crew report) |
-| **General Rocketry** | TR-18A stack decoupler (staging!), basic fins for stability |
-| **Flight Control** | SAS units (stability on ascent) |
-| **Science Tech** | Science Jr. (materials bay) — essential for early science farming on launchpad |
-| **Landing** | Landing legs and basic wheels — needed for surface missions |
-| **Advanced Rocketry** | Terrier engine (high-efficiency vacuum engine for Mun/Minmus) |
+| **Basic Rocketry** | Free — Flea booster + basic pod |
+| **Engineering 101** | T-30 Reliant + mystery goo + crew report |
+| **General Rocketry** | TR-18A decoupler + fins |
+| **Flight Control** | SAS units |
+| **Science Tech** | Science Jr. (materials bay) — essential |
+| **Landing** | Landing legs + wheels |
+| **Advanced Rocketry** | Terrier (vacuum, Mun/Minmus) |
 
-### Tech tree milestones
+### Milestones
 
 | Before Mun landing | Before Duna mission |
 |---|---|
-| Terrier engine (vacuum) | LV-N "Nerv" (nuclear engine) |
-| Solar panels (basic or OX-4L) | Docking ports (Clamp-o-tron) |
-| Batteries (Z-100 or Z-400) | Large solar panels (Gigantor) |
+| Terrier engine | LV-N Nerv (nuclear) |
+| Solar panels (basic/OX-4L) | Docking ports |
+| Batteries (Z-100/400) | Gigantor solar panels |
 | Basic comms (HG-5) | Advanced comms (RA-2, RA-15) |
-| Heat shield (1.25 m) | Heat shield (2.5 m) |
-| Parachutes (MK16 or MK2-R) | Drogue chutes |
+| 1.25m heat shield | 2.5m heat shield |
+| Parachutes (MK16/MK2-R) | Drogue chutes |
 
 ## Science Farming
 
-### Launchpad farming (tier-1)
-
-Before you leave the atmosphere, collect all possible science from the launchpad:
-
-1. Crew report (while crewed)
-2. Mystery goo observation
-3. Materials bay analysis (if unlocked)
-
-Total: 15–25 science from the pad alone. Can be repeated if you recover or transmit.
+### Launchpad (tier-1)
+Before leaving atmosphere: crew report + mystery goo + materials bay (if unlocked) = 15-25 science. Recover or transmit to repeat.
 
 ### Biomes to prioritise
 
-| Body | Biomes | Science value |
-|---|---|---|
-| **Mun** | Highlands, Midlands, Lowlands, Craters, Polar, Canyon | High — easy to reach multiple biomes |
-| **Minmus** | Flats, Lowlands, Midlands, Highlands, Slopes, Polar | Very high — low gravity makes multi-biome easy |
-| **Kerbin** | Grasslands, Highlands, Water, Deserts, Tundra, Ice Caps | Medium — mostly for early game |
-| **Duna** | Highlands, Lowlands, Midlands, Polar, Craters, Canyons | Good — but high dV cost to return |
+| Body | Science value |
+|---|---|
+| **Mun** | High — easy multi-biome |
+| **Minmus** | Very high — low gravity = easy multi-biome |
+| **Kerbin** | Medium — mostly early game |
+| **Duna** | Good — high dV cost to return |
 
 ### Kerbin system biome loot
+One ship to Minmus with 4+ experiments, visit 3-4 biomes, return. Unlocks most mid-tier tech tree in 1 mission.
 
-Maximise: send a single ship to Minmus with 4+ science experiments, visit 3-4 biomes, return. This can unlock most of mid-tier tech tree in one mission.
+### Transmit vs Recover
 
-### Science transmission vs recovery
-
-| Experiment type | Transmit efficiency | Recommendation |
+| Experiment | Transmit efficiency | Recommended |
 |---|---|---|
-| Crew report | 100% | Transmit immediately (no loss) |
-| EVA report | 100% | Transmit immediately |
-| Mystery goo | 25% | Recover or use mobile lab |
-| Materials bay | 25% | Recover or use mobile lab |
+| Crew report | 100% | Transmit |
+| EVA report | 100% | Transmit |
+| Mystery goo | 25% | Recover or mobile lab |
+| Materials bay | 25% | Recover or mobile lab |
 | Surface sample | 25% | Recover |
 
-Key insight: for low-efficiency experiments, **store and recover**. Don't transmit materials bay data. Use a scientist in a Mobile Processing Lab (late game) to process and reset experiments.
+Key: low-efficiency experiments → **store and recover**. Don't transmit materials bay. Use scientist + Mobile Processing Lab (late game) to process + reset.
 
 ## Funds Management
 
-### Income sources by stage
+### Income by stage
 
-| Stage | Primary income | Secondary income |
+| Stage | Primary | Secondary |
 |---|---|---|
 | Early (pad→orbit) | Contract advances | World first milestones |
-| Mid (Mun/Minmus) | Contract completion payouts | Science from recovery |
+| Mid (Mun/Minmus) | Contract payouts | Science from recovery |
 | Late (interplanetary) | Station/satellite contracts | Tourism |
 
 ### Expense management
 
 | Expense | When to pay | When to defer |
 |---|---|---|
-| New parts | After science farming mission | Don't buy until you need it |
-| Building upgrade | When you have 3× the cost in reserve | Never delay R&D building |
-| New astronaut | Only when needed for a specific mission | Hire free ones from rescue contracts |
-| Vessel cost | Fund from contract advance | If advance doesn't cover fuel + parts, decline contract |
+| New parts | After science farming | Don't buy until needed |
+| Building upgrade | When 3× cost in reserve | Never delay R&D |
+| New astronaut | Only for specific mission | Hire free from rescue contracts |
+| Vessel cost | Fund from contract advance | Decline if advance < fuel+parts |
 
 ## Early Game — First Contracts
 
-The first contracts come from **Kerbin World-Firsts Record-Keeping Society**.
-Available from mission start. Raw `save-parser.py` output shows these as `ExplorationContract` with `PARAM.targetType` values:
+Kerbin World-Firsts Record-Keeping Society. Available from mission start. Raw `save-parser.py` output shows these as `ExplorationContract` with `PARAM.targetType`:
 
-| targetType | Contract name | Objective | dV needed |
+| targetType | Contract | Objective | dV needed |
 |---|---|---|---|
-| `FIRSTLAUNCH` | "Launch our first vessel" | Launch any rocket (~1,000 m+ altitude) | ~100 m/s |
-| `SCIENCE` | "Gather scientific data from around Kerbin" | Collect + recover science experiment data | same flight |
-| `REACHASPACE` | "Reach space" | Exceed Kerbin atmosphere (70 km) | ~1,200 m/s |
-| `REACHORBIT` | "Reach orbit" | Achieve stable Kerbin orbit | ~3,400 m/s |
-| `FLYBYMUN` | "Fly by the Mun" | Mun flyby and return | ~4,600 m/s |
-| `LANDONMUN` | "Land on the Mun" | Mun landing | ~5,700 m/s |
-| `SPLASHKERBIN` | "Splash down in Kerbin's oceans" | Land in water | same flight as launch |
+| `FIRSTLAUNCH` | Launch first vessel | Any rocket ~1 km altitude | ~100 m/s |
+| `SCIENCE` | Gather science data | Collect + recover experiment | same flight |
+| `REACHASPACE` | Reach space | >70 km | ~1,200 m/s |
+| `REACHORBIT` | Reach orbit | Stable orbit | ~3,400 m/s |
+| `FLYBYMUN` | Fly by Mun | Mun flyby + return | ~4,600 m/s |
+| `LANDONMUN` | Land on Mun | Mun landing | ~5,700 m/s |
+| `SPLASHKERBIN` | Splash down | Land in water | same flight |
 
-These auto-generate as you progress. The first two (FIRSTLAUNCH + SCIENCE) appear immediately and can be completed in **one flight**.
+FIRSTLAUNCH + SCIENCE appear immediately, completable in **one flight**.
 
 ### Canonical first mission: Flea Hopper
 
-**Rocket:** 1× Mk1 Pod + 1× Mk16 Chute + 1× Mystery Goo + 1× RT-5 Flea + 3× Basic Fin
+**Rocket:** Mk1 Pod + Mk16 Chute + Mystery Goo + RT-5 Flea + 3× Basic Fin
 
-**Result:** Suborbital hop to ~25-35 km. Run Mystery Goo in flight. Chute down. Recover.
-Completes: `FIRSTLAUNCH` + `SCIENCE` in one flight. Pays ~151k advance + rep.
+**Result:** Suborbital hop ~25-35 km. Run Mystery Goo in flight. Chute down. Recover.
+Completes: `FIRSTLAUNCH` + `SCIENCE`. Pays ~151k advance + rep.
 See `rockets/flea-hopper.md` and `scripts/build-flea-hopper.py`.
 
 ```bash
 # Generate craft file in save's VAB:
 .venv/bin/python scripts/build-flea-hopper.py
-
-# Auto-launch and fly (kRPC, from VAB scene):
+# Auto-launch (kRPC, from VAB):
 .venv/bin/python scripts/launch-flea-hopper.py
 ```
+
 ## Advanced Tips
 
 ### World first milestones
+One-time bonuses:
 
-These are one-time bonuses for being the first to achieve something. Prioritise:
-
-| Milestone | Funds | Notes |
-|---|---|---|
-| First launch | 10,000 | Automatic |
-| First orbit | 15,000 | Easy |
-| First Mun flyby | 25,000 | Beginner goal |
-| First Mun orbit | 35,000 | |
-| First Mun landing | 50,000 | |
-| First Minmus landing | 40,000 | Easier than Mun! |
-| First Duna flyby | 80,000 | Late goal |
-| First Duna landing | 100,000 | |
-
-### Stock vs custom vessels
-
-- **Stock vessels** cost 10% less to build. Use stock designs when possible.
-- **Custom vessels** cost 10% more but can use advanced parts.
-- Balancing: early game use stock, mid/late game switch to custom.
+| Milestone | Funds |
+|---|---|
+| First launch | 10,000 |
+| First orbit | 15,000 |
+| First Mun flyby | 25,000 |
+| First Mun orbit | 35,000 |
+| First Mun landing | 50,000 |
+| First Minmus landing | 40,000 |
+| First Duna flyby | 80,000 |
+| First Duna landing | 100,000 |
 
 ### Orbital station strategy
+Build LKO station (100-120 km equatorial) as fuel depot + science hub:
+1. Core module (crew cabin + docking ports + solar panels + batteries)
+2. Dock fuel tanker
+3. Dock science lab
+4. Dock crew transfer vehicle
 
-Build a station in LKO (100-120 km equatorial) as a fuel depot and science hub:
-
-1. Launch a core module (crew cabin + docking ports + solar panels + batteries)
-2. Dock a fuel tanker to fill the depot
-3. Dock a science lab for processing
-4. Dock a crew transfer vehicle
-
-Station pays off through station-building contracts and enables deep-space missions.
+Station pays off via building contracts + enables deep-space missions.

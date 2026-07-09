@@ -74,26 +74,10 @@ Kerbol system dV requirements (from LKO, 100 km). Use `scripts/dv-map.py` for fu
 
 ### Reading the map
 
-For a mission to Duna and back:
-- LKO → Duna transfer: 1 040 m/s
-- Duna capture: 250 m/s
-- Duna landing: ~1 450 m/s (aerobrake heavily, use parachutes)
-- Duna ascent: 2 000 m/s
-- Duna → Kerbin transfer: ~1 040 m/s (slingshot or direct)
-- **Minimum total (one-way):** 1 040 + 250 + 1 450 = 2 740 m/s
-- **Round trip from LKO:** 1 040 + 250 + 1 450 + 2 000 + 1 040 = 5 780 m/s
-
+Duna round trip example: LKO→Duna (1 040) + capture (250) + landing (~1 450 aero) + ascent (2 000) + return (~1 040) = **~5 780 m/s total**. One-way: 1 040 + 250 + 1 450 = **~2 740 m/s**.
 ### Optimal order (easiest → hardest)
 
-1. Mun (3 260 m/s RT)
-2. Minmus (3 200 m/s RT)
-3. Duna (6 400 m/s RT)
-4. Dres (6 400 m/s RT)
-5. Eeloo (9 580 m/s RT)
-6. Moho (8 480 m/s RT)
-7. Eve (25 000+ RT) — very hard due to Eve ascent
-8. Jool moons (11 400 - 17 500 RT) — complex, need gravity assists
-
+Mun (3 260) → Minmus (3 200) → Duna (6 400) → Dres (6 400) → Eeloo (9 580) → Moho (8 480) → Eve (25 000+, hard ascent) → Jool moons (11 400-17 500, need gravity assists)
 ## Transfer Windows
 
 ### Phase angles
@@ -115,16 +99,15 @@ python scripts/transfer-window.py --target Duna --standalone
 
 ### Ejection angles
 
-For prograde ejection from LKO (counter-clockwise orbit, looking down from north):
+Prograde ejection from LKO (counter-clockwise orbit, north view):
 
-| Target | Approximate ejection angle from prograde |
+| Target | Ejection angle from prograde |
 |---|---|
-| Duna | ~0° (prograde, ~44° ahead of Kerbin) |
-| Eve | ~0° (prograde, ~74° behind Kerbin) |
+| Duna | ~0° (~44° ahead of Kerbin) |
+| Eve | ~0° (~74° behind Kerbin) |
 | Moho | ~(-30°) retrograde + plane change |
 | Dres | ~15° above/below plane |
 | Jool | ~0° (prograde) |
-
 ### Ejection burn calculation
 
 Desired hyperbolic excess velocity ($v_\infty$):
@@ -161,21 +144,14 @@ Where $F$ = thrust in N.
 
 | Body | Aerobrake altitude | Notes |
 |---|---|---|
-| Kerbin | 50 - 60 km | Can capture from Mun return |
-| Duna | 15 - 20 km | Thin atmosphere, may need multiple passes |
-| Eve | 60 - 70 km | Very thick, can capture from any speed |
-| Jool | 120 - 140 km | Deep atmosphere, dangerous heating |
-| Laythe | 30 - 40 km | Moderate atmosphere |
-| Lathe | 5 - 10 km | Very thin, barely effective |
+| Kerbin | 50-60 km | Can capture from Mun return |
+| Duna | 15-20 km | Thin atmo, may need multiple passes |
+| Eve | 60-70 km | Very thick, can capture from any speed |
+| Jool | 120-140 km | Deep atmo, dangerous heating |
+| Laythe | 30-40 km | Moderate |
+| Lathe | 5-10 km | Very thin, barely effective |
 
-### Aerobraking tips
-
-- Set PE to the aerobrake altitude before entering SOI
-- Use multiple passes if needed (raise PE after each pass)
-- Watch for heating — use heat shields
-- Duna aerobraking is weak; may need engine assist
-- Eve aerobraking is aggressive; set high PE to avoid lithobraking
-
+**Tips:** Set PE to aerobrake altitude before SOI entry. Use multiple passes if needed. Heat shields required. Duna aero weak — may need engine assist. Eve aero aggressive — set high PE to avoid lithobraking.
 ## Mission Planning Workflow
 
 1. **Determine mission target** and use dV map for rough budget

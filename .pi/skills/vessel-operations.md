@@ -45,38 +45,24 @@ From telemetry orbit data:
 | Plane change | At ascending/descending node | Compute from orbit vectors |
 | Capture burn | At periapsis of incoming trajectory | `v.orbit.time_to_periapsis < 30` |
 
-### Burn execution pattern
-
-```python
-# Orient to burn vector
-v.auto_pilot.target_direction(node.burn_vector(v.orbital_reference_frame))
-v.auto_pilot.engage()
-v.auto_pilot.wait()
-# Full throttle until close
-v.control.throttle = 1.0
-while node.remaining_delta_v > 0.5:
-    time.sleep(0.05)
-v.control.throttle = 0.0
-```
-
-### Throttle management during burns
+### Burn execution
+See `krpc-patterns.md` Burn at a maneuver node for full code. Throttle phases:
 
 | Phase | Action |
 |---|---|
-| Start | Full throttle immediately to minimize gravity losses |
-| Mid-burn (~50%) | Check remaining dV — if ahead of schedule, throttle down to avoid overshoot |
-| Fine-tune (< 5 m/s remaining) | Throttle ≤ 0.05 for precision |
-| Cutoff | Kill throttle at remaining_dV < 0.5 m/s |
+| Start | Full throttle (minimize gravity losses) |
+| Mid-burn (~50%) | Check remaining dV — throttle down if ahead |
+| Fine-tune (< 5 m/s) | Throttle ≤ 0.05 |
+| Cutoff | Kill at remaining_dV < 0.5 m/s |
 
 ## Biome Science
 
-Science experiments give different results per biome. Maximize science by visiting multiple biomes on the same body.
+Science differs per biome. Visit multiple biomes on same body to maximise.
 
-**Kerbin biomes:** Grasslands, Highlands, Mountains, Desert, Tundra, Ice Caps, Water, Shores, Desert, etc.
+**Kerbin:** Grasslands, Highlands, Mountains, Desert, Tundra, Ice Caps, Water, Shores
+**Mun:** Highlands, Midlands, Lowlands, Craters, Polar, Canyon
 
-**Mun biomes:** Highlands, Midlands, Lowlands, Craters, Polar, Canyon, etc.
-
-**Biome detection (kRPC):** `v.flight(v.orbit.body.reference_frame).surface_altitude` — use biome map data or `v.flight().biome` (KSP 1.12+ supports this).
+**Detection:** `v.flight().biome` (KSP 1.12+) or biome map data.
 
 ## Staging
 
@@ -92,47 +78,38 @@ Science experiments give different results per biome. Maximize science by visiti
 ### Staging in kRPC
 
 ```python
-# Inspect stage structure before staging
-current_stage = v.control.current_stage  # e.g. 4
-stage_parts = v.parts.in_stage(current_stage)  # parts in this stage
+current_stage = v.control.current_stage
+stage_parts = v.parts.in_stage(current_stage)
 
-# Stage and get list of jettisoned parts
 jettisoned = v.control.activate_next_stage()
-# Check if staging actually did something
 if not jettisoned:
     print("No parts to stage!")
 ```
 
-⚠️ **Gotcha:** When a decoupler fires, the jettisoned parts become their own
-Vessel. `activate_next_stage()` returns them as **Vessel** objects (not Part).
-Use `.name` not `.title`.
+⚠️ **Gotcha:** Decoupler jettisoned parts become their own Vessel objects. `activate_next_stage()` returns **Vessel**, not Part. Use `.name` not `.title`.
 
-### Detecting fuel depletion per stage (burnout detection)
+### Burnout detection
 
 ```python
 def stage_fuel_empty(vessel):
-    """Return True if current stage has no fuel in any resource."""
     stage_num = vessel.control.current_stage
-    stage_parts = vessel.parts.in_stage(stage_num)
-    for part in stage_parts:
+    for part in vessel.parts.in_stage(stage_num):
         for resource in part.resources.all:
             if resource.amount > 0.001 and resource.density > 0:
                 return False
     return True
 
-# Use in a loop to detect burnout
 while not stage_fuel_empty(v):
     time.sleep(0.5)
-# Stage to jettison spent boosters
 v.control.activate_next_stage()
 ```
 
-### Checking engine state after staging
+### Engine state after staging
 
 ```python
 for part in v.parts.all:
     if part.engine and part.engine.active:
-        print(f"{part.title}: active, thrust={part.engine.thrust:.0f}N, fuel={part.engine.has_fuel}")
+        print(f"{part.title}: active, thrust={part.engine.thrust:.0f}N")
 ```
 
 ### Re-entry staging: separating re-entry vehicle

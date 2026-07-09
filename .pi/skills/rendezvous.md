@@ -30,12 +30,11 @@ Burn normal/anti-normal at the ascending/descending node to match inclinations.
 
 ### Phase Angle Method
 
-For intercepting a target in a similar orbit (same body, similar altitude):
+For intercepting target in similar orbit:
 
 $$t_{wait} = \frac{\phi_{current} - \phi_{desired}}{\omega_{target} - \omega_{chaser}}$$
 
-Where $\omega$ = angular velocity = $2\pi / period$
-
+Where $\omega = 2\pi / period$
 ### Phasing Orbit Method
 
 Used when the target is ahead or behind in the same orbit.
@@ -53,13 +52,7 @@ For small phase angles: $$\Delta v \approx \frac{\mu \cdot \Delta \theta}{4 \cdo
 
 ### Bi-Elliptic Transfer
 
-For large altitude changes (ratio > 12), a bi-elliptic transfer can be more efficient than Hohmann. Use when going from LKO to Mun orbit or beyond.
-
-Three burns:
-1. Raise apoapsis far beyond target
-2. At apoapsis, raise periapsis to target altitude
-3. At new periapsis, circularise
-
+For large altitude changes (ratio > 12) — more efficient than Hohmann. Use LKO to Mun or beyond. Three burns: raise apoapsis far beyond target → at apoapsis raise periapsis to target → circularise.
 ## Docking Approach
 
 ### Approach Phases
@@ -164,15 +157,12 @@ time_to_intercept = distance / closing_speed if closing_speed > 0 else float('in
 
 Burn prograde/retrograde to set up intercept in N orbits.
 
-```python
-# Calculate burn to raise apoapsis to target orbit
-target_alt = target_vessel.orbit.apoapsis_altitude
-current_alt = vessel.orbit.apoapsis_altitude
-delta_v = target_alt - current_alt  # extremely simplified; use vis-viva
+Use vis-viva equation for precise dV: $v^2 = \mu(\frac{2}{r} - \frac{1}{a})$. Compute velocity at periapsis for current orbit vs transfer orbit, difference = burn dV.
 
-# Create node at next periapsis
+```python
+# Node at next periapsis
 ut = vessel.orbit.time_to_periapsis + conn.space_center.ut
-node = vessel.control.add_node(ut, prograde=delta_v * 0.5, normal=0, radial=0)
+node = vessel.control.add_node(ut, prograde=delta_v, normal=0, radial=0)
 ```
 
 ### Match velocity at intercept
@@ -185,7 +175,6 @@ conn.space_center.target_vessel = target_vessel
 
 # Burn retrograde relative to target
 while rel_speed > 1.0:
-    # Burn opposite to relative velocity vector
     vessel.auto_pilot.target_direction(
         (-rel_velocity[0], -rel_velocity[1], -rel_velocity[2])
     )

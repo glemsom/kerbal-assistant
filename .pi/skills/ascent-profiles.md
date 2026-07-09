@@ -22,8 +22,7 @@ Reference for launch profiles on different celestial bodies. Use with `scripts/a
 ## Physics Summary
 
 ### Atmospheric bodies
-
-Follow a **gravity turn** — start vertical, pitch over gradually, follow prograde.
+**Gravity turn** — start vertical, pitch over gradually, follow prograde.
 
 | Body | Atmosphere | Turn start | Turn end | Final pitch | Notes |
 |---|---|---|---|---|---|
@@ -35,8 +34,7 @@ Follow a **gravity turn** — start vertical, pitch over gradually, follow progr
 | Lathe | Yes, 35 km | 500 m | 20 km | 15° | Cold, thin atmosphere |
 
 ### Airless bodies
-
-No atmosphere means no drag. Best ascent strategy is a **squared gravity turn**: start horizontal immediately, pitch 90° from vertical instantly.
+No atmo = no drag. **Squared gravity turn:** start horizontal, pitch 90° from vertical instantly.
 
 | Body | TWR target | Turn start | Turn end | Final pitch |
 |---|---|---|---|---|
@@ -52,8 +50,6 @@ No atmosphere means no drag. Best ascent strategy is a **squared gravity turn**:
 | Moho | 2-3 | 0 m | 15 000 m | 45° → 0° |
 
 ## TWR by Body
-
-Minimum TWR for launch:
 
 | Body | g (m/s²) | Min TWR | Recommended |
 |---|---|---|---|
@@ -71,18 +67,18 @@ Minimum TWR for launch:
 | Body | Max Q safe limit | Notes |
 |---|---|---|
 | Kerbin | 15 000 Pa | Default limit |
-| Eve | 25 000 Pa | Thicker atmosphere → higher Q tolerance |
-| Duna | 5 000 Pa | Thin atmosphere, low Q |
+| Eve | 25 000 Pa | Thicker → higher Q tolerance |
+| Duna | 5 000 Pa | Thin atmo, low Q |
 | Laythe | 12 000 Pa | Moderate Q |
 | Jool | 50 000 Pa | Very thick, high Q tolerance |
 
 ## Quick Reference
 
-### Kerbin to 75 km orbit
-
+### Kerbin template
 ```bash
 python scripts/auto-ascent.py \
-  --target-apo 75000 \
+  --target-apo <target> \
+  --target-peri <target - 20000> \
   --turn-start 250 \
   --turn-end 40000 \
   --final-pitch 5 \
@@ -90,156 +86,66 @@ python scripts/auto-ascent.py \
   --heading 90
 ```
 
-### Kerbin to 80 km orbit (Kerbal 1-5)
+Variations:
+- **75 km orbit:** `--target-apo 75000`, omit `--target-peri`
+- **80 km orbit:** `--target-apo 80000 --target-peri 70000`
+- **100 km orbit:** `--target-apo 100000`
+- **200 km orbit:** `--target-apo 200000 --target-peri 180000`
+- **GDLV3 (SRB):** add `--srb-boosters 30`
 
+Turn profile identical across altitudes (atmo phase same); extra dV from circularization burn.
+75-100 km orbits need ~3 350 m/s dV. Any rocket with >3 500 m/s post-loss dV can reach them.
+
+### Body-specific commands
 ```bash
-python scripts/auto-ascent.py \
-  --target-apo 80000 \
-  --target-peri 70000 \
-  --turn-start 250 \
-  --turn-end 40000 \
-  --final-pitch 5 \
-  --max-q 15000 \
-  --heading 90
-```
+# Mun to 100 km orbit
+python scripts/auto-ascent.py --target-apo 100000 --turn-start 0 --turn-end 10000 --final-pitch 0 --heading 90
 
-Same turn profile as 75/100 km. Circularization burn ~40-60 m/s.
-Kerbal 1-5-specific: LV-T30 Reliant lower stage (no gimbal) + Terrier upper.
-Fins + SAS provide stability.
+# Duna to 80 km orbit
+python scripts/auto-ascent.py --target-apo 80000 --turn-start 1000 --turn-end 25000 --final-pitch 15 --heading 90
 
-Post-orbit: run `scripts/kerbal-1-5-mission.py` for de-orbit burn + re-entry + parachute landing.
-Complete pipeline:
-```bash
-.venv/bin/python scripts/auto-ascent.py --target-apo 80000 --target-peri 70000
-.venv/bin/python scripts/kerbal-1-5-mission.py
-```
-
-NOTE: 75-100 km orbits need ~3 350 m/s dV (atmospheric phase identical to 200 km).
-Any rocket with >3 500 m/s post-loss dV can reach them.
-
-### Kerbin to 100 km orbit
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 100000 \
-  --turn-start 250 \
-  --turn-end 40000 \
-  --final-pitch 5 \
-  --max-q 15000 \
-  --heading 90
-```
-
-### Kerbin to 200 km orbit (high-orbit launch)
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 200000 \
-  --target-peri 180000 \
-  --final-pitch 5 \
-  --max-q 15000 \
-  --heading 90
-```
-
-Higher apoapsis needs more horizontal speed. Same turn profile as 100 km
-(atmospheric phase identical); extra dV comes from circularization burn.
-
-### GDLV3 (SRB-assisted launch to 200 km)
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 200000 \
-  --target-peri 180000 \
-  --turn-start 250 \
-  --turn-end 40000 \
-  --final-pitch 5 \
-  --max-q 15000 \
-  --heading 90 \
-  --srb-boosters 30
-```
+# Eve to 100 km orbit
+python scripts/auto-ascent.py --target-apo 100000 --turn-start 500 --turn-end 50000 --final-pitch 10 --max-q 25000 --heading 90
 ```
 
 ## Prerequisites
 
-Before running auto-ascent.py, verify:
-
 | Check | Command | Expected |
 |---|---|---|
-| KSP running + kRPC server | `python -c "import krpc; krpc.connect()"` | No error (ConnectionRefused → KSP not running) |
+| KSP + kRPC server | `python -c "import krpc; krpc.connect()"` | No error |
 | Vessel on launchpad | Check situation | `pre_launch` or `landed` |
-| Staging correct | VAB staging order matches engine ignition | Stage with engine fires first |
-| TWR > 1.0 | dv-calc or manual check | Launch TWR ≥ 1.2 recommended |
-| Sufficient dV | dv-calc or dV map | ≥ 3 500 m/s for LKO |
+| Staging correct | VAB staging order | Engine fires first |
+| TWR > 1.0 | dv-calc or manual | ≥ 1.2 recommended |
+| dV sufficient | dv-calc or dV map | ≥ 3 500 m/s for LKO |
 
 Common failures:
-- kRPC not running → start KSP, load save, check kRPC status in Tracking Station
-- Wrong active vessel → switch to correct vessel in KSP
-- Staging reversed → verify in VAB that engines are in correct stage order
-
-
-### Mun to 100 km orbit
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 100000 \
-  --turn-start 0 \
-  --turn-end 10000 \
-  --final-pitch 0 \
-  --heading 90
-```
-
-### Duna to 80 km orbit
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 80000 \
-  --turn-start 1000 \
-  --turn-end 25000 \
-  --final-pitch 15 \
-  --heading 90
-```
-
-### Eve to 100 km orbit
-
-```bash
-python scripts/auto-ascent.py \
-  --target-apo 100000 \
-  --turn-start 500 \
-  --turn-end 50000 \
-  --final-pitch 10 \
-  --max-q 25000 \
-  --heading 90
-```
+- kRPC not running → start KSP, load save, check kRPC status
+- Wrong active vessel → switch in KSP
+- Staging reversed → verify VAB stage order
 
 ## Advanced: Computing Your Own Profile
 
-For a body not listed, compute:
-
-1. **Turn start:** If atmosphere exists, start at ~0.5% of atmo depth. If no atmo, start at 0 m.
-2. **Turn end:** ~60% of atmo depth for atmo bodies, higher for airless.
-3. **Final pitch:** 5° for thick atmo, 15° for thin, 0° for airless.
-4. **Max Q:** Body g × 1000 for rough estimate.
+For unlisted bodies:
+1. **Turn start:** If atmosphere, ~0.5% of atmo depth. If airless, 0 m.
+2. **Turn end:** ~60% atmo depth (atmo), higher for airless.
+3. **Final pitch:** 5° thick atmo, 15° thin, 0° airless.
+4. **Max Q:** Body g × 1000 (rough estimate).
 
 ## Multi-Stage Ascent Notes
 
-### Staging Logic (`auto-ascent.py`)
+### Staging Logic (`auto-aspect.py`)
+Script auto-stages when: thrust drops to zero + 1s cooldown + stages remain. Prevents premature staging through decoupler-only stages while SRBs burn.
 
-The script handles staging automatically. The `should_stage()` function activates the next stage when:
-1. Vessel thrust drops to zero (engines burned out)
-2. A 1-second cooldown has passed (prevents double-staging during transitions)
-3. Stages remain (not at stage 0/parachutes)
+### Typical Profiles
 
-This avoids the common error of premature staging through decoupler-only stages while SRBs are still burning.
-
-### Typical Multi-Stage Profiles
-
-| Layout | Staging order | Notes |
+| Layout | Staging | Notes |
 |---|---|---|
-| SRBs + sustainer | SRBs fire → decouple SRBs → sustainer fires | SRBs should burn out before decouple |
-| Asparagus | All engines → drop empty tanks sequentially | Auto-ascent stages when thrust drops |
-| 2-stage (vacuum) | Lower stage → decouple → upper stage | Circularization on upper stage |
+| SRBs + sustainer | SRBs fire → decouple → sustainer fires | SRBs burn out before decouple |
+| Asparagus | All engines → drop empty tanks sequentially | Stages when thrust drops |
+| 2-stage (vacuum) | Lower → decouple → upper | Circularization on upper |
 
 ### Troubleshooting
 
-- **Parachutes deploy during ascent:** Staging reached stage 0 prematurely. Check that SRBs/thrusters burn long enough before staging triggers. The `should_stage()` fix prevents this by only staging when thrust is zero.
-- **Vessel won't lift off:** TWR < 1.0 or wrong staging. Check engine staging in VAB.
-- **Decouplers fire too early:** SRBs still burning when staging fires. Either reduce `turn_start_alt` (to get SRBs burning longer at low altitude) or ensure SRBs have enough fuel to burn until staging.
+- **Parachutes deploy during ascent:** Stage 0 reached prematurely. Check SRB burn time. `should_stage()` fix prevents staging when thrust > 0.
+- **Won't lift off:** TWR < 1.0 or wrong staging.
+- **Decouplers fire too early:** SRBs still burning. Reduce `turn_start_alt` or add SRB fuel.
