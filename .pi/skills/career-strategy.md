@@ -140,6 +140,38 @@ Key insight: for low-efficiency experiments, **store and recover**. Don't transm
 | New astronaut | Only when needed for a specific mission | Hire free ones from rescue contracts |
 | Vessel cost | Fund from contract advance | If advance doesn't cover fuel + parts, decline contract |
 
+## Early Game — First Contracts
+
+The first contracts come from **Kerbin World-Firsts Record-Keeping Society**.
+Available from mission start. Raw `save-parser.py` output shows these as `ExplorationContract` with `PARAM.targetType` values:
+
+| targetType | Contract name | Objective | dV needed |
+|---|---|---|---|
+| `FIRSTLAUNCH` | "Launch our first vessel" | Launch any rocket (~1,000 m+ altitude) | ~100 m/s |
+| `SCIENCE` | "Gather scientific data from around Kerbin" | Collect + recover science experiment data | same flight |
+| `REACHASPACE` | "Reach space" | Exceed Kerbin atmosphere (70 km) | ~1,200 m/s |
+| `REACHORBIT` | "Reach orbit" | Achieve stable Kerbin orbit | ~3,400 m/s |
+| `FLYBYMUN` | "Fly by the Mun" | Mun flyby and return | ~4,600 m/s |
+| `LANDONMUN` | "Land on the Mun" | Mun landing | ~5,700 m/s |
+| `SPLASHKERBIN` | "Splash down in Kerbin's oceans" | Land in water | same flight as launch |
+
+These auto-generate as you progress. The first two (FIRSTLAUNCH + SCIENCE) appear immediately and can be completed in **one flight**.
+
+### Canonical first mission: Flea Hopper
+
+**Rocket:** 1× Mk1 Pod + 1× Mk16 Chute + 1× Mystery Goo + 1× RT-5 Flea + 3× Basic Fin
+
+**Result:** Suborbital hop to ~25-35 km. Run Mystery Goo in flight. Chute down. Recover.
+Completes: `FIRSTLAUNCH` + `SCIENCE` in one flight. Pays ~151k advance + rep.
+See `rockets/flea-hopper.md` and `scripts/build-flea-hopper.py`.
+
+```bash
+# Generate craft file in save's VAB:
+.venv/bin/python scripts/build-flea-hopper.py
+
+# Auto-launch and fly (kRPC, from VAB scene):
+.venv/bin/python scripts/launch-flea-hopper.py
+```
 ## Advanced Tips
 
 ### World first milestones

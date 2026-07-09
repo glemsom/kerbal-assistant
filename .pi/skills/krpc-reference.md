@@ -49,6 +49,9 @@ Default ports: RPC=50000, Stream=50001. Configure in KSP → kRPC toolbar.
 
 > **Gotchas:** SpaceCenter has no `game_scene` attr in v0.5.4. `.warp_rate` throws
 > when not in flight scene. Always wrap `active_vessel` access.
+> **No `current_scene` or `game_scene` attribute** in kRPC 0.5.x. Cannot detect scene programmatically. Use `launch_vessel_from_vab()` when you know you're in VAB, or direct user to enter VAB manually.
+> **No recover vessel API** — kRPC cannot recover a landed vessel. User must do it manually via KSP Tracking Station > Recover.
+> **Search caveat:** Web-searching "KSP" returns Kentucky State Police results. Always query "Kerbal Space Program" instead.
 
 
 ### Vessel
@@ -84,6 +87,52 @@ v = conn.space_center.active_vessel
 | `.control.nodes` | `list[Node]` | All maneuver nodes |
 | `.control.remove_nodes()` | — | Remove all nodes |
 
+# ---------------------------------------------------------------------------
+# Parts & Modules
+# ---------------------------------------------------------------------------
+
+### Part
+
+```python
+parts = v.parts.all  # list[Part]
+p = parts[0]
+```
+
+|| Attribute | Returns | Description |
+---|---|---|
+| `.name` | `str` | KSP part name (dot notation, e.g. `mk1pod.v2`) |
+| `.persistent_id` | `int` | Unique part instance ID |
+| `.modules` | **`list[Module]`** | ⚠️ **Not a dict!** Iterate and check `.name` |
+| `.tags` | `str` | Part tags |
+
+### Module
+
+```python
+for mod in p.modules:
+    if mod.name == 'ModuleScienceExperiment':
+        if mod.has_event('Deploy'):
+            mod.trigger_event('Deploy')
+```
+
+|| Property | Returns | Description |
+---|---|---|
+| `.name` | `str` | Module class name (e.g. `ModuleScienceExperiment`) |
+| `.events` | `list[str]` | Available event names |
+| `.has_event(name)` | `bool` | Check if event exists |
+| `.trigger_event(name)` | — | Fire a part event |
+| `.fields` | `list[Field]` | Module fields/values |
+
+| Common modules: | |
+|---|---|
+| `ModuleScienceExperiment` | Science parts. Events: `Deploy`, `RunTest`, `Observe ...` (varies by experiment) |
+| `ModuleParachute` | Parachutes. Event: `Deploy` |
+| `ModuleCommand` | Command pods/probes. Events: `ToggleSameVesselInteraction`, `SetSameVesselInteraction` |
+| `ModuleAnimateGeneric` | Animated parts (solar panels, antennas). Events: `Extend`/`Retract`/`Toggle` |
+| `ModuleDecouple` | Decouplers. Event: `Decouple` |
+| `ModuleDockingNode` | Docking ports. Event: `Undock`, `ToggleCrossfeed` |
+
+> **Pattern:** Always iterate `p.modules` with a for-loop. Don't assume index or dict-like access.
+
 ### AutoPilot
 
 ```python
@@ -94,7 +143,8 @@ ap.target_direction = (x, y, z)              # PROPERTY, not a method!
 ap.engage()
 ap.disengage()
 ap.wait()
-```
+
+
 
 | Property | Description |
 |---|---|
