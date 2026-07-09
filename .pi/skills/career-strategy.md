@@ -142,18 +142,88 @@ FIRSTLAUNCH + SCIENCE appear immediately, completable in **one flight**.
 
 ### Canonical first mission: Flea Hopper
 
-**Rocket:** Mk1 Pod + Mk16 Chute + Mystery Goo + RT-5 Flea + 3× Basic Fin
+**Rocket (with tech):** Mk1 Pod + Mk16 Chute + Mystery Goo + RT-5 Flea + 3× Basic Fin
+**Rocket (0-tech / fresh start):** Mk1 Pod + Mk16 Chute + RT-5 Flea + 3× Basic Fin
 
-**Result:** Suborbital hop ~25-35 km. Run Mystery Goo in flight. Chute down. Recover.
-Completes: `FIRSTLAUNCH` + `SCIENCE`. Pays ~151k advance + rep.
-See `rockets/flea-hopper.md` and `scripts/build-flea-hopper.py`.
+⚠️ **0-tech caveat:** Mystery Goo requires Engineering 101 (costs science). 
+If you have 0 tech nodes researched, **omit Mystery Goo** from the build. 
+Use `scripts/build-flea-tester.py` for the no-goo variant.
+The test-only craft still completes `FIRSTLAUNCH`.
+
+**Result:** Suborbital hop ~25-35 km. Run Mystery Goo in flight (if available). Chute down. Recover.
+Completes: `FIRSTLAUNCH` + `SCIENCE` (if goo equipped). Pays ~151k advance + rep.
+See `rockets/flea-hopper.md`, `scripts/build-flea-hopper.py` (with goo), and `scripts/build-flea-tester.py` (no goo).
 
 ```bash
 # Generate craft file in save's VAB:
-.venv/bin/python scripts/build-flea-hopper.py
+.venv/bin/python scripts/build-flea-hopper.py      # with Mystery Goo (have Engineering 101)
+.venv/bin/python scripts/build-flea-tester.py       # no Mystery Goo (fresh career)
 # Auto-launch (kRPC, from VAB):
 .venv/bin/python scripts/launch-flea-hopper.py
 ```
+
+### PartTest contracts — reading from save
+
+PartTest contracts require testing a specific part in a specific situation.
+The internal part name uses dot notation (e.g. `solidBooster.sm.v2`).
+
+```bash
+# Find active PartTest: what part, where, what situation
+python scripts/save-parser.py --raw /path/to/persistent.sfs | jq '
+  .GAME.SCENARIO[] | select(.name == "ContractSystem")
+  | .CONTRACTS.CONTRACT[] | select(.type == "PartTest" and .state == "Active")
+  | {part: .part, sit: .PARAM.situation, body: .PARAM.body, haul: .haul, exp: .exp}
+'
+```
+
+Key PartTest fields:
+- `part` — Internal part name (use table below to resolve display name)
+- `sit` — Required situation: `PRELAUNCH`, `FLYING`, `SUBORBITAL`, `ORBITING`, `SPLASHED`, `LANDED`
+- `body` — Celestial body id (`1` = Kerbin, `2` = Mun, `3` = Minmus)
+- `haul` — If `true`, part must be stowed in cargo bay/fairing
+- `exp` — If `true`, use experimental/deployed variant
+
+### Common internal part names
+
+For PartTest contracts and craft building, .sfs uses dots, .craft uses underscores:
+
+**SRBs**
+
+| Internal name | Display name | Size |
+|---|---|---|
+| `solidBooster.sm` / `solidBooster_sm` | RT-5 "Flea" (v1) | 0.625m |
+| `solidBooster.sm.v2` / `solidBooster_sm_v2` | RT-5 "Flea" (v2) | 0.625m |
+| `solidBooster` | RT-10 "Hammer" (v1) | 1.25m |
+| `solidBooster.v2` / `solidBooster_v2` | RT-10 "Hammer" (v2) | 1.25m |
+| `solidBooster1-1` | BACC "Thumper" | 1.25m |
+
+**Liquid engines**
+
+| Internal name | Display name | Tech |
+|---|---|---|
+| `liquidEngine2.v2` / `liquidEngine2_v2` | LV-T30 "Reliant" | Engineering 101 |
+| `liquidEngine` | LV-T45 "Swivel" | General Rocketry |
+| `liquidEngine3.v2` / `liquidEngine3_v2` | LV-909 "Terrier" | Advanced Rocketry |
+| `nuclearEngine` | LV-N "Nerv" | Nuclear Propulsion |
+
+**Pods, chutes, utility**
+
+| Internal name | Display name | Tech |
+|---|---|---|
+| `mk1pod.v2` / `mk1pod_v2` | Mk1 Command Pod | Basic Rocketry |
+| `parachuteSingle` | Mk16 Parachute | Basic Rocketry |
+| `radialDrogue` | Mk2-R Radial Drogue | Basic Rocketry |
+| `GooExperiment` | Mystery Goo | Engineering 101 |
+| `science.module` / `ScienceExperiment` | Science Jr. (Materials Bay) | Science Tech |
+| `launchClamp1` | Launch Clamp | Basic Rocketry |
+| `sasModule` | Inline Reaction Wheel | Flight Control |
+| `basicFin` | Basic Fin | Basic Rocketry |
+| `noseCone` | Aerodynamic Nose Cone | Basic Rocketry |
+| `fuelTank` | FL-T200 Fuel Tank | Basic Rocketry |
+| `fuelTank.long` / `fuelTank_long` | FL-T400 Fuel Tank | Basic Rocketry |
+| `fuelTankFlat` | FL-T100 Fuel Tank | Basic Rocketry |
+
+> **Finding names:** `grep -r 'name =' \"Kerbal Space Program/GameData/Squad/Parts/\"/*/*.cfg` | grep -v deprecated
 
 ## Advanced Tips
 

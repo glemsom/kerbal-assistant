@@ -1,33 +1,21 @@
 #!/usr/bin/env python3
-"""Generate a simple 'Flea Hopper' .craft file for early career contracts.
+"""Generate a minimal craft to test RT-5 Flea on launchpad (PartTest contract).
 
-Design: suborbital science hopper using only start-tech parts.
-  Stage 0: RT-5 Flea ignites (liftoff)
-  Stage-1: Mk16 parachute deploy (re-entry)
-
-Parts (top→bottom):
-  - Mk16 Parachute (on pod top)
-  - Mk1 Command Pod (root)
-  - Mystery Goo (radial on pod)
-  - RT-5 Flea SRB (under pod)
-  - 3× Basic Fin (on Flea, 120° symmetry)
-
-Completes both active contracts:
-  - FIRSTLAUNCH (launch any vessel)
-  - SCIENCE (collect/recover mystery goo data)
+Active contract: PartTest solidBooster.sm.v2 @ PRELAUNCH (Kerbin).
+Design: Mk1 Pod + Mk16 Chute + Flea + 3x Basic Fin.
+No Mystery Goo — user hasn't researched Engineering 101 yet.
 
 Usage:
-    .venv/bin/python scripts/build-flea-hopper.py
-    .venv/bin/python scripts/build-flea-hopper.py --name "Flea Hopper" --sandbox
-
-See docs/agents/craft-format.md for format reference.
+    .venv/bin/python scripts/build-flea-tester.py
+    .venv/bin/python scripts/build-flea-tester.py --name "Flea Tester" --sandbox
 """
-
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
+import random
 import sys
 import time
 from pathlib import Path
@@ -68,51 +56,26 @@ def find_active_save() -> Path | None:
     return best[1]
 
 
-# ---------------------------------------------------------------------------
-# Craft template — pre-computed positions for VAB build platform
-# All rescaleFactor = 1 except GooExperiment (0.6)
-#
-# Node reference:
-#   mk1pod.v2:      top_y =  0.642376,  bottom_y = -0.405038
-#   parachuteSingle: bottom_y = -0.120649
-#   solidBooster.sm.v2: top_y = 0.7575, bottom_y = -0.9975
-#   GooExperiment:  radial attach (0, 0, -0.15) * 0.6
-#   basicFin:       radial attach (0, 0, 0)
-#
-# Coordinate origin at pod center. In VAB world-space the root
-# pod sits at Y = 1.5 (matching the minimal template convention).
-# ---------------------------------------------------------------------------
-
-# Pod at Y=1.5
+# --- Coordinate constants (same VAB origin as flea-hopper) ---
 POD_Y = 1.5
-POD_TOP = POD_Y + 0.642376   # 2.142376  — chute bottom node aligns here
-POD_BOTTOM = POD_Y - 0.405038  # 1.094962 — flea top node aligns here
+POD_TOP = POD_Y + 0.642376
+POD_BOTTOM = POD_Y - 0.405038
+CHUTE_Y = POD_TOP + 0.120649
+FLEA_Y = POD_BOTTOM - 0.7575
+FIN_Y = FLEA_Y
+FIN_RADIUS = 0.625
+FIN_ANGLES = [90, 210, 330]
 
-# Parachute: chute_bottom_y = chute_center_y - 0.120649
-#   chute_center_y - 0.120649 = POD_TOP
-#   chute_center_y = POD_TOP + 0.120649
-CHUTE_Y = POD_TOP + 0.120649  # 2.263025
-
-# Flea: flea_top_y = flea_center_y + 0.7575
-#   flea_center_y + 0.7575 = POD_BOTTOM
-#   flea_center_y = POD_BOTTOM - 0.7575
-FLEA_Y = POD_BOTTOM - 0.7575  # 0.337462
-
-# Flea bottom (for fin Y positioning)
-FLEA_BOTTOM = FLEA_Y - 0.9975  # -0.660038
-
-# Mystery Goo: radial attach to pod at Y ≈ pod center
-GOO_Y = POD_Y  # 1.5
-GOO_RADIUS = 0.625  # ~1.25m pod radius, goo sticks to side
-
-# Fins: radial on Flea body, ~mid-height
-FIN_Y = FLEA_Y  # centered on flea
+fin_positions = []
+for angle in FIN_ANGLES:
+    rad = math.radians(angle)
+    fin_positions.append((FIN_RADIUS * math.cos(rad), FIN_RADIUS * math.sin(rad)))
 
 CRAFT_TEMPLATE = """ship = {name}
 version = 1.12.5
-description = Suborbital science hopper for early career contracts
+description = Flea booster test for PartTest contract
 type = VAB
-size = 1.25,5.5,1.25
+size = 1.25,4.0,1.25
 steamPublishedFileId = 0
 persistentId = 233386374
 rot = 0,0,0,0
@@ -150,7 +113,6 @@ PART
 	modMass = 0
 	modSize = 0,0,0
 	link = parachuteSingle_{chute_id}
-	link = GooExperiment_{goo_id}
 	link = solidBooster.sm.v2_{flea_id}
 	attN = top,parachuteSingle_{chute_id}_0|0.642375588|0_0|1|0_0|0.642375588|0_0|1|0
 	attN = bottom,solidBooster.sm.v2_{flea_id}_0|-0.40503791|0_0|-1|0_0|-0.40503791|0_0|-1|0
@@ -209,44 +171,6 @@ PART
 		}}
 	}}
 	attN = bottom,mk1pod.v2_{pod_id}_0|-0.120649|0_0|-1|0_0|-0.120649|0_0|-1|0
-}}
-
-PART
-{{
-	part = GooExperiment_{goo_id}
-	partName = Part
-	persistentId = {goo_id}
-	pos = {goo_r},1.5,{goo_z}
-	attPos = 0,0,0
-	attPos0 = {goo_r},1.5,{goo_z}
-	rot = 0,0,0,1
-	attRot = 0,0,0,1
-	attRot0 = 0,0,0,1
-	mir = 1,1,1
-	symMethod = Radial
-	autostrutMode = Off
-	rigidAttachment = False
-	istg = -1
-	resPri = 0
-	dstg = 0
-	sidx = -1
-	sqor = -1
-	sepI = -1
-	attm = 1
-	sameVesselCollision = False
-	modCost = 0
-	modMass = 0
-	modSize = 0,0,0
-	EVENTS
-	{{
-	}}
-	ACTIONS
-	{{
-		RunTest
-		{{
-			actionGroup = Custom01
-		}}
-	}}
 }}
 
 PART
@@ -392,29 +316,10 @@ PART
 
 
 def generate_craft(name: str) -> str:
-    """Generate craft file content with unique persistent IDs."""
-    import random
-    import math
-
     rng = random.Random(name)
 
     def pid() -> int:
         return rng.randint(100000000, 999999999)
-
-    # Fin positions: 3 fins at 120° spacing around the Flea body
-    # Flea radius ≈ 0.625m (size 1)
-    fin_radius = 0.625
-    fin_angles = [90, 210, 330]  # Start at 90° for VAB coordinates
-
-    fin_positions = []
-    for angle in fin_angles:
-        rad = math.radians(angle)
-        fx = fin_radius * math.cos(rad)
-        fz = fin_radius * math.sin(rad)
-        fin_positions.append((fx, fz))
-
-    # Goo position: single radial attach on pod, +Z side
-    goo_radius = 0.625 + 0.09  # pod radius + goo half-thickness
 
     return CRAFT_TEMPLATE.format(
         name=name,
@@ -422,9 +327,6 @@ def generate_craft(name: str) -> str:
         pod_y=POD_Y,
         chute_id=pid(),
         chute_y=CHUTE_Y,
-        goo_id=pid(),
-        goo_r=0.0,
-        goo_z=goo_radius,
         flea_id=pid(),
         flea_y=FLEA_Y,
         fin1_id=pid(),
@@ -440,23 +342,17 @@ def generate_craft(name: str) -> str:
     )
 
 
-# ---------------------------------------------------------------------------
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate a Flea Hopper .craft file for early contracts.",
-        epilog="Examples:\n"
-               "  python scripts/build-flea-hopper.py\n"
-               "  python scripts/build-flea-hopper.py --name \"Flea Hopper\"\n"
-               "  python scripts/build-flea-hopper.py --sandbox",
+        description="Generate a Flea Tester .craft file for PartTest contract.",
     )
-    parser.add_argument("--name", "-n", type=str, default="Flea Hopper",
-                        help="Craft name (default: 'Flea Hopper')")
+    parser.add_argument("--name", "-n", type=str, default="Flea Tester",
+                        help="Craft name (default: 'Flea Tester')")
     parser.add_argument("--sandbox", "-s", action="store_true",
                         help="Write to Sandbox save instead of most recent")
 
     args = parser.parse_args()
 
-    # Determine target VAB directory
     if args.sandbox:
         vab_dir = KSP_DIR / "saves/Sandbox/Ships/VAB"
     else:
@@ -475,12 +371,10 @@ def main() -> None:
         print(json.dumps({"error": f"Failed to write {craft_path}"}))
         sys.exit(1)
 
-    # Verify via kRPC
     try:
         conn = krpc.connect(name="craft-builder", address="127.0.0.1", rpc_port=50000)
         sc = conn.space_center
-        time.sleep(0.5)  # let KSP pick up new file
-
+        time.sleep(0.5)
         vessels = sc.launchable_vessels("VAB")
         if args.name in vessels:
             print(json.dumps({

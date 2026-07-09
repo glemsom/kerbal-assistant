@@ -48,13 +48,24 @@ KSP_DIR = Path.home() / ".local/share/Steam/steamapps/common/Kerbal Space Progra
 
 
 def find_active_save() -> Path | None:
-    """Return path to the most recently modified save Ships/VAB dir."""
+    """Return path to the most recently modified save Ships/VAB dir.
+
+    Prefers "default" over sandbox/training/scenarios.
+    """
     saves_dir = KSP_DIR / "saves"
     if not saves_dir.exists():
         return None
 
+    # Prefer "default" if it has a VAB
+    default_vab = saves_dir / "default" / "Ships" / "VAB"
+    if default_vab.exists():
+        return default_vab
+
     best: tuple[float, Path] = (0, None)
+    skip = {"sandbox", "Sandbox", "scenarios", "training", "steam_autocloud.vdf"}
     for entry in saves_dir.iterdir():
+        if entry.name in skip:
+            continue
         vab_dir = entry / "Ships" / "VAB"
         if vab_dir.exists():
             mtime = os.path.getmtime(vab_dir)
