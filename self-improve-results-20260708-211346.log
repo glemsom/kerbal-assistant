@@ -1,2 +1,0 @@
-2026-07-08 21:14:01 | iter=1 | dur=15s | exit=0 | score=5 | changes="created rockets/kerbal-1-5.md, added SRB Kerbin 80km profile to ascent-profiles.md, added heatshield-less LKO re-entry to landing-profiles.md, added prerequisites check to ascent-profiles.md, updated rockets/README.md"
-2026-07-08 21:14:27 | iter=2 | dur=26s | exit=0 | score=3 → | changes="created rockets/kerbal-1-5.md, updated rockets/README.md, added 80km Kerbin profile and prerequisites to ascent-profiles.md, added kerbal-1-5-mission.py reference to landing-profiles.md"
