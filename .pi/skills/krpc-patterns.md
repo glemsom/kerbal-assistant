@@ -1,3 +1,8 @@
+---
+name: krpc-patterns
+description: Code examples for kRPC patterns — connectivity check, maneuver node burns, coordinate transforms, streaming. Loaded on demand from krpc-reference.md.
+---
+
 # Common kRPC Patterns
 
 Loaded on demand from `krpc-reference.md` when code examples needed.
